@@ -1,6 +1,6 @@
 # Moustache Plucker Bot
 
-Discord RNG giveaway bot that "plucks" random winners from participants.
+minimal discord RNG giveaway bot that "plucks" random winners from participants
 
 ## Quick Start
 
@@ -10,18 +10,21 @@ deno task init && deno task dev
 
 ## Features
 
-- React-to-enter giveaways
-- Cryptographically secure random selection
+- react-to-enter giveaways
+- secure random selection
 - Multiple winners per giveaway
-- Persistent storage across restarts
-- Real-time participant tracking
+- persistent storage across restarts
+- real-time participant tracking
+- toggle on no B2B winners via: `/toggle b2b`
 
 ## Commands
 
-- `/giveaway create` - Start a new giveaway
-- `/giveaway end` - Manually end and draw winners
-- `/giveaway list` - View active giveaways
-- `/giveaway cancel` - Cancel a giveaway
+- `/giveaway create` - start a new giveaway
+  - `giveaway create {item & amount} {time left} {winner(s) quantity}`
+  - `giveaway create pumpkin $20 45s 3`
+- `/giveaway end` - manually end and draw winners
+- `/giveaway list` - view active giveaways
+- `/giveaway cancel` - cancel a giveaway (or last by default)
 
 ## Development
 

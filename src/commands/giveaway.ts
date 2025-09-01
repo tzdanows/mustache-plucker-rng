@@ -60,31 +60,17 @@ async function handleCreate(interaction: CommandInteraction) {
     // Calculate end time
     const endsAt = new Date(Date.now() + durationMs);
 
-    // Create customized embed - use the full input as the title
-    const titleText = itemInput;
+    // Create customized embed with new format
+    const titleText = itemInput;  // Title without bold - Discord will handle title formatting
     const timeRemaining = formatTimeRemaining(endsAt);
+    
+    const description = `plucking in: \`${timeRemaining}\`\nentries: \`0\`\nwinner(s): awaiting...`;
     
     const embed = new EmbedBuilder()
       .setTitle(titleText)
+      .setDescription(description)
       .setColor(0x5865F2)
-      .addFields(
-        { 
-          name: "Plucking in", 
-          value: timeRemaining, 
-          inline: false 
-        },
-        { 
-          name: "Entries", 
-          value: "0", 
-          inline: false 
-        },
-        { 
-          name: "Winner(s)", 
-          value: `${winners} moustache${winners > 1 ? "s" : ""} will be plucked`, 
-          inline: false 
-        }
-      )
-      .setFooter({ text: "React with 🎉 to enter!" })
+      .setFooter({ text: "react with 🌙 to enter" })
       .setTimestamp(endsAt);
 
     // Send the giveaway message
@@ -93,11 +79,11 @@ async function handleCreate(interaction: CommandInteraction) {
     });
 
     // Add reaction
-    await message.react("🎉");
+    await message.react("🌙");
 
     // Create giveaway in database
     const giveawayId = crypto.randomUUID();
-    await createGiveaway({
+    const giveawayData = {
       id: giveawayId,
       guild_id: interaction.guildId!,
       channel_id: interaction.channelId,
@@ -108,7 +94,13 @@ async function handleCreate(interaction: CommandInteraction) {
       item_price: undefined,  // No separate price field now
       winner_count: winners,
       ends_at: endsAt.toISOString(),
-    });
+    };
+    
+    await createGiveaway(giveawayData);
+    
+    // Schedule precise ending for this giveaway
+    const client = interaction.client as MoustachePluckerBot;
+    client.giveawayManager.scheduleGiveawayEnd(giveawayData);
 
     logger.info(`Giveaway created: ${giveawayId} for ${itemInput} by ${interaction.user.tag}`);
   } catch (error) {

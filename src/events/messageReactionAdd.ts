@@ -19,7 +19,7 @@ export default {
     }
 
     // Check if this reaction is for a giveaway
-    if (reaction.emoji.name === "🎉") {
+    if (reaction.emoji.name === "🌙") {
       try {
         const messageId = reaction.message.id;
         const userId = user.id;

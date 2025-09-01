@@ -9,21 +9,22 @@ export class EmbedUpdater {
   private updateInterval: number | null = null;
   private activeGiveaways: Map<string, { giveaway: any, lastUpdate: number }> = new Map();
   private messageCache: Map<string, any> = new Map();
+  private lastUpdateTime: Map<string, number> = new Map();
 
   constructor(client: Client) {
     this.client = client;
   }
 
   start(): void {
-    // Update embeds every 1 second for real-time countdown
+    // Update embeds every 3 seconds - balance between responsiveness and API limits
     this.updateInterval = setInterval(() => {
       this.updateActiveGiveaways();
-    }, 1000);
+    }, 3000);
 
     // Initial update
     this.updateActiveGiveaways();
     
-    logger.info("Embed updater started (1s interval)");
+    logger.info("Embed updater started (3s interval for smooth updates)");
   }
 
   stop(): void {
@@ -69,6 +70,12 @@ export class EmbedUpdater {
   private async updateGiveawayEmbed(giveaway: any): Promise<void> {
     try {
       if (!giveaway.message_id) return;
+      
+      // Rate limit: Don't update the same message more than once per 2 seconds
+      const lastUpdate = this.lastUpdateTime.get(giveaway.id) || 0;
+      if (Date.now() - lastUpdate < 2000) {
+        return;
+      }
 
       const channel = await this.client.channels.fetch(giveaway.channel_id) as TextChannel;
       if (!channel) return;
@@ -84,36 +91,25 @@ export class EmbedUpdater {
       const endsAt = new Date(giveaway.ends_at);
       const timeRemaining = formatTimeRemaining(endsAt);
 
-      // Build updated embed
-      const titleText = giveaway.item_name;  // Now contains the full title including price
+      // Build updated embed with new format
+      const titleText = giveaway.item_name;  // Title without bold
+      
+      const description = `plucking in: \`${timeRemaining === "Ended" ? "Ending..." : timeRemaining}\`\nentries: \`${participantCount}\`\nwinner(s): awaiting...`;
 
       const embed = new EmbedBuilder()
         .setTitle(titleText)
+        .setDescription(description)
         .setColor(0x5865F2)
-        .addFields(
-          { 
-            name: "Plucking in", 
-            value: timeRemaining === "Ended" ? "Ending..." : timeRemaining, 
-            inline: false 
-          },
-          { 
-            name: "Entries", 
-            value: participantCount.toString(), 
-            inline: false 
-          },
-          { 
-            name: "Winner(s)", 
-            value: `${giveaway.winner_count} moustache${giveaway.winner_count > 1 ? "s" : ""} will be plucked`, 
-            inline: false 
-          }
-        )
-        .setFooter({ text: "React with 🎉 to enter!" })
+        .setFooter({ text: "react with 🌙 to enter" })
         .setTimestamp(endsAt);
 
       // Update the message
       await message.edit({ embeds: [embed] }).catch((error) => {
         logger.debug(`Could not update giveaway embed: ${error.message}`);
       });
+      
+      // Record update time
+      this.lastUpdateTime.set(giveaway.id, Date.now());
     } catch (error) {
       logger.debug(`Error updating giveaway ${giveaway.id}:`, error);
     }
