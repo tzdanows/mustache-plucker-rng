@@ -78,6 +78,9 @@ export class MoustachePluckerBot extends Client {
     // Import and register all command handlers
     const commandFiles = [
       "giveaway.ts",
+      "cancel.ts",
+      "end.ts",
+      "list.ts",
       "ping.ts",
       "stats.ts",
     ];

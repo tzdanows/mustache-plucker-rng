@@ -8,6 +8,9 @@ export async function deployCommands(): Promise<void> {
   // Import command modules and get their data
   const commandFiles = [
     "../commands/giveaway.ts",
+    "../commands/cancel.ts",
+    "../commands/end.ts",
+    "../commands/list.ts",
     "../commands/ping.ts",
     "../commands/stats.ts",
   ];

@@ -13,15 +13,15 @@ export class GiveawayManager {
   }
 
   start(): void {
-    // Check for ended giveaways every 30 seconds
+    // Check for ended giveaways every 1 second for instant winner selection
     this.checkInterval = setInterval(() => {
       this.checkEndedGiveaways();
-    }, 30000);
+    }, 1000);
 
     // Initial check
     this.checkEndedGiveaways();
     
-    logger.info("Giveaway manager started");
+    logger.info("Giveaway manager started (1s check interval for instant winner selection)");
   }
 
   stop(): void {
@@ -114,9 +114,7 @@ export class GiveawayManager {
       if (giveaway.message_id) {
         try {
           const originalMessage = await channel.messages.fetch(giveaway.message_id);
-          const titleText = giveaway.item_price ? 
-            `${giveaway.item_name} ${giveaway.item_price}` : 
-            giveaway.item_name;
+          const titleText = giveaway.item_name;  // Now contains the full title including price
           
           const updatedEmbed = new EmbedBuilder()
             .setTitle(titleText)
@@ -148,9 +146,7 @@ export class GiveawayManager {
       }
       
       // Create winner announcement embed
-      const titleText = giveaway.item_price ? 
-        `${giveaway.item_name} ${giveaway.item_price}` : 
-        giveaway.item_name;
+      const titleText = giveaway.item_name;  // Now contains the full title including price
       
       const winnerEmbed = new EmbedBuilder()
         .setTitle(titleText)

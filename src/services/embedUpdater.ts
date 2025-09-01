@@ -7,22 +7,23 @@ import { logger } from "../utils/logger.ts";
 export class EmbedUpdater {
   private client: Client;
   private updateInterval: number | null = null;
-  private activeGiveaways: Map<string, any> = new Map();
+  private activeGiveaways: Map<string, { giveaway: any, lastUpdate: number }> = new Map();
+  private messageCache: Map<string, any> = new Map();
 
   constructor(client: Client) {
     this.client = client;
   }
 
   start(): void {
-    // Update embeds every 5 seconds
+    // Update embeds every 1 second for real-time countdown
     this.updateInterval = setInterval(() => {
       this.updateActiveGiveaways();
-    }, 5000);
+    }, 1000);
 
     // Initial update
     this.updateActiveGiveaways();
     
-    logger.info("Embed updater started");
+    logger.info("Embed updater started (1s interval)");
   }
 
   stop(): void {
@@ -40,7 +41,7 @@ export class EmbedUpdater {
     ).get(giveawayId);
     
     if (giveaway) {
-      this.activeGiveaways.set(giveawayId, giveaway);
+      this.activeGiveaways.set(giveawayId, { giveaway, lastUpdate: Date.now() });
     }
   }
 
@@ -84,9 +85,7 @@ export class EmbedUpdater {
       const timeRemaining = formatTimeRemaining(endsAt);
 
       // Build updated embed
-      const titleText = giveaway.item_price ? 
-        `${giveaway.item_name} ${giveaway.item_price}` : 
-        giveaway.item_name;
+      const titleText = giveaway.item_name;  // Now contains the full title including price
 
       const embed = new EmbedBuilder()
         .setTitle(titleText)

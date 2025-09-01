@@ -127,15 +127,15 @@ export class WebServer {
     winnerIds: Set<string>,
     userMap: Map<string, string>
   ): string {
-    const titleText = giveaway.item_price ? 
-      `${giveaway.item_name} ${giveaway.item_price}` : 
-      giveaway.item_name;
+    const titleText = giveaway.item_name;  // Now contains the full title including price
     
-    const statusBadge = {
-      active: { color: "#10b981", text: "Active" },
-      ended: { color: "#3b82f6", text: "Ended" },
-      cancelled: { color: "#ef4444", text: "Cancelled" },
-    }[giveaway.status] || { color: "#6b7280", text: giveaway.status };
+    const statusBadge = (
+      {
+        active: { color: "#10b981", text: "Active" },
+        ended: { color: "#3b82f6", text: "Ended" },
+        cancelled: { color: "#ef4444", text: "Cancelled" },
+      } as Record<string, { color: string; text: string }>
+    )[giveaway.status] || { color: "#6b7280", text: giveaway.status };
     
     return `<!DOCTYPE html>
 <html lang="en">
