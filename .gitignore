@@ -1,0 +1,45 @@
+# Notes and documentation
+/notes/
+
+# Environment variables
+.env
+.env.local
+.env.production
+
+# Dependencies
+node_modules/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+
+# Logs
+logs/
+*.log
+
+# Build output
+dist/
+build/
+.deno/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.claude
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+
+# Backups
+*.backup
+*.bak
+
+# Temporary files
+tmp/
+temp/

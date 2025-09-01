@@ -1,0 +1,49 @@
+{
+  "tasks": {
+    "dev": "deno run --watch --allow-net --allow-env --allow-read --allow-write src/main.ts",
+    "start": "deno run --allow-net --allow-env --allow-read --allow-write src/main.ts",
+    "test": "deno test --allow-net --allow-env --allow-read --allow-write",
+    "test:unit": "deno test tests/unit/",
+    "test:integration": "deno test tests/integration/",
+    "fmt": "deno fmt",
+    "lint": "deno lint",
+    "check": "deno check src/**/*.ts",
+    "init": "deno cache --reload src/deps.ts && deno task db:init",
+    "db:init": "deno run --allow-read --allow-write src/db/migrate.ts",
+    "db:seed": "deno run --allow-read --allow-write --allow-env src/db/seed.ts",
+    "build": "deno compile --allow-net --allow-env --allow-read --allow-write --output=moustache-plucker src/main.ts"
+  },
+  "imports": {
+    "@std/dotenv": "jsr:@std/dotenv@^0.225.0",
+    "@std/fs": "jsr:@std/fs@^1.0.0",
+    "@std/path": "jsr:@std/path@^1.0.0",
+    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "@db/sqlite": "jsr:@db/sqlite@^0.12.0",
+    "discord.js": "npm:discord.js@^14.16.3",
+    "@discordjs/builders": "npm:@discordjs/builders@^1.9.0",
+    "@discordjs/rest": "npm:@discordjs/rest@^2.4.0"
+  },
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true
+  },
+  "nodeModulesDir": "auto",
+  "lint": {
+    "include": ["src/"],
+    "exclude": ["node_modules/"],
+    "rules": {
+      "tags": ["recommended"]
+    }
+  },
+  "fmt": {
+    "include": ["src/", "tests/"],
+    "exclude": ["node_modules/"],
+    "indentWidth": 2,
+    "lineWidth": 100,
+    "proseWrap": "preserve"
+  }
+}
