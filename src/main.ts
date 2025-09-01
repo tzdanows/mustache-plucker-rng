@@ -2,9 +2,13 @@ import { validateConfig } from "./config/config.ts";
 import { MoustachePluckerBot } from "./bot/client.ts";
 import { logger } from "./utils/logger.ts";
 import { initDatabase } from "./db/database.ts";
+import { setupGlobalErrorHandlers } from "./utils/errorHandler.ts";
 
 async function main() {
   try {
+    // Set up global error handlers
+    setupGlobalErrorHandlers();
+    
     // Validate configuration
     validateConfig();
     logger.info("Configuration validated successfully");

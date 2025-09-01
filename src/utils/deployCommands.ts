@@ -9,6 +9,7 @@ export async function deployCommands(): Promise<void> {
   const commandFiles = [
     "../commands/giveaway.ts",
     "../commands/ping.ts",
+    "../commands/stats.ts",
   ];
 
   for (const file of commandFiles) {

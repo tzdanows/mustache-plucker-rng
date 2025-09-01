@@ -4,10 +4,13 @@ import {
   EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
-  ButtonStyle 
+  ButtonStyle,
+  type TextChannel
 } from "../deps.ts";
-import { createGiveaway } from "../db/giveawayRepository.ts";
+import { createGiveaway, getActiveGiveaways, getGiveawayParticipants } from "../db/giveawayRepository.ts";
 import { logger } from "../utils/logger.ts";
+import { getDatabase } from "../db/database.ts";
+import type { MoustachePluckerBot } from "../bot/client.ts";
 
 export default {
   data: new SlashCommandBuilder()
@@ -156,22 +159,150 @@ async function handleCreate(interaction: CommandInteraction) {
 }
 
 async function handleEnd(interaction: CommandInteraction) {
-  await interaction.reply({
-    content: "⏳ Ending giveaway... (This feature will be implemented soon)",
-    ephemeral: true,
-  });
+  await interaction.deferReply({ ephemeral: true });
+
+  try {
+    const messageId = interaction.options.get("message_id")?.value as string;
+    const client = interaction.client as MoustachePluckerBot;
+    
+    // Check permissions
+    if (!interaction.memberPermissions?.has("ManageGuild")) {
+      const db = getDatabase();
+      const giveaway = db.prepare(
+        "SELECT creator_id FROM giveaways WHERE message_id = ?"
+      ).get(messageId) as { creator_id: string } | undefined;
+      
+      if (!giveaway || giveaway.creator_id !== interaction.user.id) {
+        await interaction.editReply({
+          content: "❌ You don't have permission to end this giveaway.",
+        });
+        return;
+      }
+    }
+    
+    const success = await client.giveawayManager.endGiveawayManually(
+      messageId,
+      interaction.user.id
+    );
+    
+    if (success) {
+      await interaction.editReply({
+        content: "✅ Giveaway ended successfully! Winners have been announced.",
+      });
+    } else {
+      await interaction.editReply({
+        content: "❌ Could not find an active giveaway with that message ID.",
+      });
+    }
+  } catch (error) {
+    logger.error("Failed to end giveaway:", error);
+    await interaction.editReply({
+      content: "❌ An error occurred while ending the giveaway.",
+    });
+  }
 }
 
 async function handleList(interaction: CommandInteraction) {
-  await interaction.reply({
-    content: "📋 Listing giveaways... (This feature will be implemented soon)",
-    ephemeral: true,
-  });
+  await interaction.deferReply({ ephemeral: true });
+
+  try {
+    const giveaways = await getActiveGiveaways(interaction.guildId!);
+    
+    if (giveaways.length === 0) {
+      await interaction.editReply({
+        content: "📋 No active giveaways in this server.",
+      });
+      return;
+    }
+    
+    const embed = new EmbedBuilder()
+      .setTitle("📋 Active Giveaways")
+      .setColor(0x5865F2)
+      .setTimestamp();
+    
+    for (const giveaway of giveaways.slice(0, 10)) { // Limit to 10
+      const endsAt = new Date(giveaway.ends_at);
+      const participantCount = await getGiveawayParticipants(giveaway.id).then(p => p.length);
+      
+      embed.addFields({
+        name: giveaway.item_name,
+        value: `Message ID: ${giveaway.message_id}\n` +
+               `Winners: ${giveaway.winner_count}\n` +
+               `Participants: ${participantCount}\n` +
+               `Ends: <t:${Math.floor(endsAt.getTime() / 1000)}:R>`,
+        inline: true,
+      });
+    }
+    
+    await interaction.editReply({ embeds: [embed] });
+  } catch (error) {
+    logger.error("Failed to list giveaways:", error);
+    await interaction.editReply({
+      content: "❌ An error occurred while listing giveaways.",
+    });
+  }
 }
 
 async function handleCancel(interaction: CommandInteraction) {
-  await interaction.reply({
-    content: "❌ Cancelling giveaway... (This feature will be implemented soon)",
-    ephemeral: true,
-  });
+  await interaction.deferReply({ ephemeral: true });
+
+  try {
+    const messageId = interaction.options.get("message_id")?.value as string;
+    const db = getDatabase();
+    
+    // Check permissions
+    if (!interaction.memberPermissions?.has("ManageGuild")) {
+      const giveaway = db.prepare(
+        "SELECT creator_id FROM giveaways WHERE message_id = ?"
+      ).get(messageId) as { creator_id: string } | undefined;
+      
+      if (!giveaway || giveaway.creator_id !== interaction.user.id) {
+        await interaction.editReply({
+          content: "❌ You don't have permission to cancel this giveaway.",
+        });
+        return;
+      }
+    }
+    
+    // Update giveaway status
+    const result = db.prepare(
+      "UPDATE giveaways SET status = 'cancelled' WHERE message_id = ? AND status = 'active'"
+    ).run(messageId);
+    
+    if (result > 0) {
+      // Try to update the original message
+      try {
+        const giveaway = db.prepare(
+          "SELECT * FROM giveaways WHERE message_id = ?"
+        ).get(messageId) as any;
+        
+        const channel = await interaction.client.channels.fetch(giveaway.channel_id) as TextChannel;
+        const message = await channel.messages.fetch(messageId);
+        
+        const embed = new EmbedBuilder()
+          .setTitle("❌ **GIVEAWAY CANCELLED** ❌")
+          .setDescription(`**${giveaway.item_name}**\n\nThis giveaway has been cancelled.`)
+          .setColor(0xFF0000)
+          .setFooter({ text: `Cancelled by ${interaction.user.tag}` })
+          .setTimestamp();
+        
+        await message.edit({ embeds: [embed] });
+      } catch (error) {
+        logger.warn("Could not update cancelled giveaway message:", error);
+      }
+      
+      await interaction.editReply({
+        content: "✅ Giveaway cancelled successfully.",
+      });
+    } else {
+      await interaction.editReply({
+        content: "❌ Could not find an active giveaway with that message ID.",
+      });
+    }
+  } catch (error) {
+    logger.error("Failed to cancel giveaway:", error);
+    await interaction.editReply({
+      content: "❌ An error occurred while cancelling the giveaway.",
+    });
+  }
 }

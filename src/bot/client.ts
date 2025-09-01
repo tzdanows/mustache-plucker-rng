@@ -1,18 +1,12 @@
-import { Client, Collection, GatewayIntentBits, type CommandInteraction } from "../deps.ts";
+import { Client, Collection, GatewayIntentBits } from "../deps.ts";
 import { config } from "../config/config.ts";
 import { logger } from "../utils/logger.ts";
-
-export interface Command {
-  data: {
-    name: string;
-    description: string;
-    toJSON: () => unknown;
-  };
-  execute: (interaction: CommandInteraction) => Promise<void>;
-}
+import type { SlashCommand } from "../types/discord.ts";
+import { GiveawayManager } from "../services/giveawayManager.ts";
 
 export class MoustachePluckerBot extends Client {
-  commands: Collection<string, Command>;
+  commands: Collection<string, SlashCommand>;
+  giveawayManager: GiveawayManager;
 
   constructor() {
     super({
@@ -25,6 +19,7 @@ export class MoustachePluckerBot extends Client {
     });
 
     this.commands = new Collection();
+    this.giveawayManager = new GiveawayManager(this);
   }
 
   async start(): Promise<void> {
@@ -77,6 +72,7 @@ export class MoustachePluckerBot extends Client {
     const commandFiles = [
       "giveaway.ts",
       "ping.ts",
+      "stats.ts",
     ];
 
     for (const file of commandFiles) {
