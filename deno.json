@@ -1,16 +1,17 @@
 {
   "tasks": {
-    "dev": "deno run --watch --allow-net --allow-env --allow-read --allow-write src/main.ts",
-    "start": "deno run --allow-net --allow-env --allow-read --allow-write src/main.ts",
-    "test": "deno test --allow-net --allow-env --allow-read --allow-write",
-    "test:unit": "deno test tests/unit/",
-    "test:integration": "deno test tests/integration/",
+    "setup": "deno run --allow-read --allow-write --allow-env scripts/setup.ts",
+    "dev": "deno run --watch --allow-net --allow-env --allow-read --allow-write --allow-ffi src/main.ts",
+    "start": "deno run --allow-net --allow-env --allow-read --allow-write --allow-ffi src/main.ts",
+    "test": "deno test --allow-net --allow-env --allow-read --allow-write --allow-ffi",
+    "test:unit": "deno test tests/unit/ --allow-net --allow-env --allow-read --allow-write --allow-ffi",
+    "test:integration": "deno test tests/integration/ --allow-net --allow-env --allow-read --allow-write --allow-ffi",
     "fmt": "deno fmt",
     "lint": "deno lint",
     "check": "deno check src/**/*.ts",
     "init": "deno cache --reload src/deps.ts && deno task db:init",
-    "db:init": "deno run --allow-read --allow-write src/db/migrate.ts",
-    "db:seed": "deno run --allow-read --allow-write --allow-env src/db/seed.ts",
+    "db:init": "deno run --allow-read --allow-write --allow-ffi --allow-env src/db/migrate.ts",
+    "db:seed": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-net src/db/seed.ts",
     "build": "deno compile --allow-net --allow-env --allow-read --allow-write --output=moustache-plucker src/main.ts"
   },
   "imports": {

@@ -11,6 +11,7 @@ import { createGiveaway, getActiveGiveaways, getGiveawayParticipants } from "../
 import { logger } from "../utils/logger.ts";
 import { getDatabase } from "../db/database.ts";
 import type { MoustachePluckerBot } from "../bot/client.ts";
+import { parseDuration, formatTimeRemaining } from "../utils/duration.ts";
 
 export default {
   data: new SlashCommandBuilder()
@@ -25,19 +26,17 @@ export default {
             .setName("item")
             .setDescription("Name of the item to give away")
             .setRequired(true))
+        .addStringOption(option =>
+          option
+            .setName("duration")
+            .setDescription("Duration (e.g., 30s, 5m, 2h, 7d, 1y)")
+            .setRequired(true))
         .addIntegerOption(option =>
           option
             .setName("winners")
             .setDescription("Number of winners (default: 3)")
             .setMinValue(1)
             .setMaxValue(100))
-        .addIntegerOption(option =>
-          option
-            .setName("duration")
-            .setDescription("Duration in minutes")
-            .setRequired(true)
-            .setMinValue(1)
-            .setMaxValue(43200)) // Max 30 days
         .addIntegerOption(option =>
           option
             .setName("quantity")
@@ -63,12 +62,12 @@ export default {
     .addSubcommand(subcommand =>
       subcommand
         .setName("cancel")
-        .setDescription("Cancel a giveaway")
+        .setDescription("Cancel a giveaway (defaults to last created)")
         .addStringOption(option =>
           option
             .setName("message_id")
-            .setDescription("Message ID of the giveaway")
-            .setRequired(true))),
+            .setDescription("Message ID of the giveaway (optional)")
+            .setRequired(false))),
 
   async execute(interaction: CommandInteraction) {
     const subcommand = interaction.options.data[0]?.name;
@@ -101,30 +100,49 @@ async function handleCreate(interaction: CommandInteraction) {
   try {
     // Get options
     const itemName = interaction.options.get("item")?.value as string;
-    const winners = (interaction.options.get("winners")?.value as number) || 3;
-    const duration = interaction.options.get("duration")?.value as number;
+    const winners = (interaction.options.get("winners")?.value as number) || 1;
+    const durationStr = interaction.options.get("duration")?.value as string;
     const quantity = (interaction.options.get("quantity")?.value as number) || 1;
     const price = interaction.options.get("price")?.value as string | undefined;
 
-    // Calculate end time
-    const endsAt = new Date(Date.now() + duration * 60 * 1000);
+    // Parse duration
+    const durationMs = parseDuration(durationStr);
+    if (!durationMs) {
+      await interaction.editReply({
+        content: "❌ Invalid duration format. Use formats like: 30s, 5m, 2h, 7d, 1y",
+      });
+      return;
+    }
 
-    // Create embed
+    // Calculate end time
+    const endsAt = new Date(Date.now() + durationMs);
+
+    // Create customized embed
+    const titleText = price ? `${itemName} ${price}` : itemName;
+    const timeRemaining = formatTimeRemaining(endsAt);
+    
     const embed = new EmbedBuilder()
-      .setTitle("🎉 **GIVEAWAY** 🎉")
-      .setDescription(`**${itemName}**`)
+      .setTitle(titleText)
       .setColor(0x5865F2)
       .addFields(
-        { name: "Quantity", value: quantity.toString(), inline: true },
-        { name: "Winners", value: `${winners} lucky moustache${winners > 1 ? "s" : ""}`, inline: true },
-        { name: "Ends", value: `<t:${Math.floor(endsAt.getTime() / 1000)}:R>`, inline: true }
+        { 
+          name: "Plucking in", 
+          value: timeRemaining, 
+          inline: false 
+        },
+        { 
+          name: "Entries", 
+          value: "0", 
+          inline: false 
+        },
+        { 
+          name: "Winner(s)", 
+          value: `${winners} moustache${winners > 1 ? "s" : ""} will be plucked`, 
+          inline: false 
+        }
       )
       .setFooter({ text: "React with 🎉 to enter!" })
       .setTimestamp(endsAt);
-
-    if (price) {
-      embed.addFields({ name: "Value", value: price, inline: true });
-    }
 
     // Send the giveaway message
     const message = await interaction.editReply({
@@ -247,16 +265,44 @@ async function handleCancel(interaction: CommandInteraction) {
   await interaction.deferReply({ ephemeral: true });
 
   try {
-    const messageId = interaction.options.get("message_id")?.value as string;
     const db = getDatabase();
+    let messageId = interaction.options.get("message_id")?.value as string | undefined;
+    let giveaway: any;
+    
+    // If no message ID provided, get the last active giveaway
+    if (!messageId) {
+      giveaway = db.prepare(
+        `SELECT * FROM giveaways 
+         WHERE guild_id = ? AND status = 'active' 
+         ORDER BY created_at DESC 
+         LIMIT 1`
+      ).get(interaction.guildId) as any;
+      
+      if (!giveaway) {
+        await interaction.editReply({
+          content: "❌ No active giveaways found in this server.",
+        });
+        return;
+      }
+      
+      messageId = giveaway.message_id;
+    } else {
+      // Get the specified giveaway
+      giveaway = db.prepare(
+        "SELECT * FROM giveaways WHERE message_id = ?"
+      ).get(messageId) as any;
+      
+      if (!giveaway) {
+        await interaction.editReply({
+          content: "❌ Could not find a giveaway with that message ID.",
+        });
+        return;
+      }
+    }
     
     // Check permissions
     if (!interaction.memberPermissions?.has("ManageGuild")) {
-      const giveaway = db.prepare(
-        "SELECT creator_id FROM giveaways WHERE message_id = ?"
-      ).get(messageId) as { creator_id: string } | undefined;
-      
-      if (!giveaway || giveaway.creator_id !== interaction.user.id) {
+      if (giveaway.creator_id !== interaction.user.id) {
         await interaction.editReply({
           content: "❌ You don't have permission to cancel this giveaway.",
         });
@@ -266,22 +312,22 @@ async function handleCancel(interaction: CommandInteraction) {
     
     // Update giveaway status
     const result = db.prepare(
-      "UPDATE giveaways SET status = 'cancelled' WHERE message_id = ? AND status = 'active'"
-    ).run(messageId);
+      "UPDATE giveaways SET status = 'cancelled' WHERE id = ? AND status = 'active'"
+    ).run(giveaway.id);
     
     if (result > 0) {
       // Try to update the original message
       try {
-        const giveaway = db.prepare(
-          "SELECT * FROM giveaways WHERE message_id = ?"
-        ).get(messageId) as any;
-        
         const channel = await interaction.client.channels.fetch(giveaway.channel_id) as TextChannel;
         const message = await channel.messages.fetch(messageId);
         
+        const titleText = giveaway.item_price ? 
+          `${giveaway.item_name} ${giveaway.item_price}` : 
+          giveaway.item_name;
+        
         const embed = new EmbedBuilder()
-          .setTitle("❌ **GIVEAWAY CANCELLED** ❌")
-          .setDescription(`**${giveaway.item_name}**\n\nThis giveaway has been cancelled.`)
+          .setTitle(`❌ ${titleText}`)
+          .setDescription("This giveaway has been cancelled.")
           .setColor(0xFF0000)
           .setFooter({ text: `Cancelled by ${interaction.user.tag}` })
           .setTimestamp();
@@ -292,11 +338,11 @@ async function handleCancel(interaction: CommandInteraction) {
       }
       
       await interaction.editReply({
-        content: "✅ Giveaway cancelled successfully.",
+        content: `✅ Giveaway for **${giveaway.item_name}** cancelled successfully.`,
       });
     } else {
       await interaction.editReply({
-        content: "❌ Could not find an active giveaway with that message ID.",
+        content: "❌ This giveaway is not active or already ended.",
       });
     }
   } catch (error) {

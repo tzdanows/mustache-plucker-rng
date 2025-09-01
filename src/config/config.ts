@@ -21,6 +21,9 @@ export const config = {
     nodeEnv: Deno.env.get("NODE_ENV") || "development",
     logLevel: Deno.env.get("LOG_LEVEL") || "info",
   },
+  web: {
+    port: parseInt(Deno.env.get("WEB_PORT") || "8081"),
+  },
 };
 
 // Validate required configuration

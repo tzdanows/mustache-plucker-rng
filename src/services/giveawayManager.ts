@@ -104,53 +104,85 @@ export class GiveawayManager {
       const channel = await this.client.channels.fetch(giveaway.channel_id) as TextChannel;
       if (!channel) return;
 
-      const winnerMentions = winners.map(id => `<@${id}>`).join(", ");
+      const winnerMentions = winners.map(id => `<@${id}>`).join("\n");
+      const allParticipants = await getGiveawayParticipants(giveaway.id);
       
-      const embed = new EmbedBuilder()
-        .setTitle("🎉 **GIVEAWAY ENDED** 🎉")
-        .setDescription(`**${giveaway.item_name}**`)
+      // Generate plucking summary page URL
+      const summaryUrl = `http://localhost:8081/giveaway/${giveaway.id}`;
+      
+      // Update original message to show it ended
+      if (giveaway.message_id) {
+        try {
+          const originalMessage = await channel.messages.fetch(giveaway.message_id);
+          const titleText = giveaway.item_price ? 
+            `${giveaway.item_name} ${giveaway.item_price}` : 
+            giveaway.item_name;
+          
+          const updatedEmbed = new EmbedBuilder()
+            .setTitle(titleText)
+            .setColor(0x808080) // Gray for ended
+            .addFields(
+              { 
+                name: "Plucked", 
+                value: `<t:${Math.floor(Date.now() / 1000)}:R>`, 
+                inline: false 
+              },
+              { 
+                name: "Entries", 
+                value: allParticipants.length.toString(), 
+                inline: false 
+              },
+              { 
+                name: "Winner(s)", 
+                value: winnerMentions || "No winners", 
+                inline: false 
+              }
+            )
+            .setFooter({ text: "Giveaway ended" })
+            .setTimestamp();
+          
+          await originalMessage.edit({ embeds: [updatedEmbed] });
+        } catch (error) {
+          logger.warn("Could not update original giveaway message:", error);
+        }
+      }
+      
+      // Create winner announcement embed
+      const titleText = giveaway.item_price ? 
+        `${giveaway.item_name} ${giveaway.item_price}` : 
+        giveaway.item_name;
+      
+      const winnerEmbed = new EmbedBuilder()
+        .setTitle(titleText)
         .setColor(0x00FF00)
+        .setDescription("The following moustache hairs were plucked:")
         .addFields(
           { 
             name: "🎩 Winners", 
             value: winnerMentions || "No winners", 
             inline: false 
           },
-          { 
-            name: "Quantity", 
-            value: giveaway.item_quantity.toString(), 
-            inline: true 
-          },
-          { 
-            name: "Total Entries", 
-            value: (await getGiveawayParticipants(giveaway.id)).length.toString(), 
-            inline: true 
+          {
+            name: "📊 Summary",
+            value: `[Plucking Summary](${summaryUrl})`,
+            inline: false
           }
         )
-        .setFooter({ text: `Giveaway ID: ${giveaway.id}` })
+        .setFooter({ text: `Total entries: ${allParticipants.length}` })
         .setTimestamp();
 
-      if (giveaway.item_price) {
-        embed.addFields({ name: "Value", value: giveaway.item_price, inline: true });
-      }
-
-      // Reply to original message if possible
-      if (giveaway.message_id) {
-        try {
-          const originalMessage = await channel.messages.fetch(giveaway.message_id);
-          await originalMessage.reply({ embeds: [embed] });
-        } catch {
-          await channel.send({ embeds: [embed] });
-        }
-      } else {
-        await channel.send({ embeds: [embed] });
-      }
+      // Send winner announcement
+      await channel.send({ embeds: [winnerEmbed] });
 
       // Send congratulations message
-      await channel.send(
-        `🎊 Congratulations ${winnerMentions}! You've won **${giveaway.item_name}**! 🎊\n` +
-        `Please contact <@${giveaway.creator_id}> to claim your prize.`
-      );
+      if (winners.length > 0) {
+        for (const winnerId of winners) {
+          await channel.send(
+            `🎊 Congratulations <@${winnerId}>! 🎊\n` +
+            `> Please dm paypal address + keycap title to <@${giveaway.creator_id}> to claim your **${giveaway.item_name}**!`
+          );
+        }
+      }
     } catch (error) {
       logger.error("Failed to announce winners:", error);
     }

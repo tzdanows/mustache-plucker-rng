@@ -3,10 +3,12 @@ import { config } from "../config/config.ts";
 import { logger } from "../utils/logger.ts";
 import type { SlashCommand } from "../types/discord.ts";
 import { GiveawayManager } from "../services/giveawayManager.ts";
+import { EmbedUpdater } from "../services/embedUpdater.ts";
 
 export class MoustachePluckerBot extends Client {
   commands: Collection<string, SlashCommand>;
   giveawayManager: GiveawayManager;
+  embedUpdater: EmbedUpdater;
 
   constructor() {
     super({
@@ -20,6 +22,7 @@ export class MoustachePluckerBot extends Client {
 
     this.commands = new Collection();
     this.giveawayManager = new GiveawayManager(this);
+    this.embedUpdater = new EmbedUpdater(this);
   }
 
   async start(): Promise<void> {
@@ -31,11 +34,15 @@ export class MoustachePluckerBot extends Client {
       await this.loadCommands();
 
       // Login to Discord
+      logger.info("Attempting to login to Discord...");
       await this.login(config.discord.token);
       
       logger.info("Moustache Plucker Bot is starting...");
     } catch (error) {
-      logger.error("Failed to start bot:", error);
+      logger.error("Failed to start bot:", error instanceof Error ? error.message : String(error));
+      if (error instanceof Error && error.message.includes("token")) {
+        logger.error("Token issue detected. Please check your DISCORD_TOKEN in .env file");
+      }
       throw error;
     }
   }

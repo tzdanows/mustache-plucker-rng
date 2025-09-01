@@ -15,10 +15,11 @@ export default {
     logger.info(`Serving ${client.guilds.cache.size} guild(s)`);
     
     // Set bot status
-    client.user.setActivity("plucking moustaches 🎩", { type: 0 });
+    client.user.setActivity("running the numbers", { type: 0 });
     
-    // Start giveaway manager
+    // Start services
     bot.giveawayManager.start();
+    bot.embedUpdater.start();
     
     // Deploy slash commands
     try {

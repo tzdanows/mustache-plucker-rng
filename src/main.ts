@@ -1,8 +1,9 @@
-import { validateConfig } from "./config/config.ts";
+import { config, validateConfig } from "./config/config.ts";
 import { MoustachePluckerBot } from "./bot/client.ts";
 import { logger } from "./utils/logger.ts";
 import { initDatabase } from "./db/database.ts";
 import { setupGlobalErrorHandlers } from "./utils/errorHandler.ts";
+import { WebServer } from "./web/server.ts";
 
 async function main() {
   try {
@@ -21,10 +22,16 @@ async function main() {
     const bot = new MoustachePluckerBot();
     await bot.start();
     
+    // Start web server for giveaway summaries
+    const webServer = new WebServer(config.web.port);
+    webServer.setDiscordClient(bot);
+    await webServer.start();
+    
     // Handle graceful shutdown
     const shutdownHandler = async () => {
       logger.info("Shutting down gracefully...");
       bot.destroy();
+      webServer.stop();
       Deno.exit(0);
     };
 
@@ -32,7 +39,10 @@ async function main() {
     Deno.addSignalListener("SIGTERM", shutdownHandler);
 
   } catch (error) {
-    logger.error("Fatal error during startup:", error);
+    logger.error("Fatal error during startup:", error instanceof Error ? error.message : String(error));
+    if (error instanceof Error) {
+      logger.error("Stack trace:", error.stack);
+    }
     Deno.exit(1);
   }
 }
