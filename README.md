@@ -1,8 +1,16 @@
 # Moustache Plucker Bot
 
-minimal discord RNG giveaway bot that "plucks" random winners from participants
+minimal discord RNG giveaway bot that "plucks" random winners from reactions
 
 ## Quick Start
+
+### Invite
+
+```
+https://discord.com/oauth2/authorize?client_id=1411869206575583352
+```
+
+### Clone & run
 
 ```bash
 deno task init && deno task dev
