@@ -6,6 +6,7 @@
     "test": "deno run -A scripts/test-quick.ts",
     "test:quick": "deno run -A scripts/test-quick.ts",
     "test:full": "deno run -A scripts/test-full.ts",
+    "test:stress": "deno run -A scripts/test-stress.ts",
     "test:unit": "deno test tests/unit/ --allow-net --allow-env --allow-read --allow-write --allow-ffi",
     "test:integration": "deno test tests/integration/ --allow-net --allow-env --allow-read --allow-write --allow-ffi",
     "fmt": "deno fmt",

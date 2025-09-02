@@ -2,6 +2,10 @@
 
 minimal discord RNG giveaway bot that "plucks" random winners from reactions
 
+optimized for rapid reactions via concurrency
+
+this bot uses the Web Crypto API's crypto.getRandomValues() which generates cryptographically secure random numbers. The Fisher-Yates shuffle algorithm then ensures every participant has an exactly equal chance of winning, making manipulation mathematically impossible.
+
 ## Quick Start
 
 ### Invite
