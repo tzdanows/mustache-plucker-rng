@@ -149,22 +149,20 @@ await runTest("database", "Can insert and query giveaway", () => {
 // === COMMAND TESTS ===
 console.log(`\n${BLUE}Command Tests${RESET}`);
 
-await runTest("commands", "All command files exist", async () => {
-  const commands = ["giveaway", "cancel", "sync", "end"];
-  
-  for (const cmd of commands) {
-    const stat = await Deno.stat(`./src/commands/${cmd}.ts`);
-    assertEquals(stat.isFile, true, `${cmd}.ts should exist`);
-  }
+await runTest("commands", "Command registration script exists", async () => {
+  const stat = await Deno.stat(`./src/register-commands.ts`);
+  assertEquals(stat.isFile, true, `register-commands.ts should exist`);
 });
 
-await runTest("commands", "Commands export required structure", async () => {
-  for (const cmdName of ["giveaway", "cancel"]) {
-    const module = await import(`../src/commands/${cmdName}.ts`);
-    assertExists(module.default, `${cmdName} should have default export`);
-    assertExists(module.default.data, `${cmdName} should have data property`);
-    assertExists(module.default.execute, `${cmdName} should have execute function`);
-  }
+await runTest("commands", "Registration script has correct commands", async () => {
+  const content = await Deno.readTextFile(`./src/register-commands.ts`);
+  
+  // Check that the new commands are defined
+  assertEquals(content.includes('setName("fs")'), true, "Should have /fs command");
+  assertEquals(content.includes('setName("cancel")'), true, "Should have /cancel command");
+  assertEquals(content.includes('setName("end")'), true, "Should have /end command");
+  assertEquals(content.includes('setName("sync")'), true, "Should have /sync command");
+  assertEquals(content.includes('setName("ping")'), true, "Should have /ping command");
 });
 
 // === SERVICE TESTS ===

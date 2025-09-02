@@ -153,21 +153,14 @@ await test("Required directories exist", async () => {
   }
 })();
 
-// Test 8: Command Files
-await test("All slash commands exist", async () => {
-  const commands = [
-    "giveaway.ts",
-    "cancel.ts",
-    "sync.ts",
-    "end.ts",
-  ];
-  
-  for (const cmd of commands) {
-    try {
-      await Deno.stat(`./src/commands/${cmd}`);
-    } catch {
-      throw new Error(`Command file ${cmd} not found`);
-    }
+// Test 8: Command Registration Script
+await test("Command registration script exists", async () => {
+  // We now use a single registration script instead of individual command files
+  try {
+    const stat = await Deno.stat("./src/register-commands.ts");
+    assert(stat.isFile, "register-commands.ts is not a file");
+  } catch {
+    throw new Error("Command registration script not found");
   }
 })();
 
@@ -199,7 +192,7 @@ if (testsFailed === 0) {
   console.log(`\n${GREEN}✅ All quick tests passed!${RESET}`);
   console.log("\nNext steps:");
   console.log("1. Run the bot: deno task dev");
-  console.log("2. Test in Discord: /giveaway Test $5 30s 1");
+  console.log("2. Test in Discord: /fs Test $5 30s 1");
   console.log("3. Run full test suite: deno run -A scripts/test-full.ts");
 } else {
   console.log(`\n${RED}❌ Some tests failed. Fix issues before running the bot.${RESET}`);
