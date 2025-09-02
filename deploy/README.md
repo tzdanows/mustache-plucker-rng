@@ -1,6 +1,6 @@
 # Moustache Plucker - Deno Deploy
 
-Dynamic giveaway report pages for the Moustache Plucker Discord bot.
+Dynamic flash sale report pages for the Moustache Plucker Discord bot.
 
 ## Quick Deploy
 
@@ -47,8 +47,8 @@ open http://localhost:8432/report/test-123
 ## API Endpoints
 
 - `GET /` - Homepage
-- `GET /report/{giveaway-id}` - View giveaway report
-- `POST /api/giveaway` - Update giveaway data (requires auth)
+- `GET /report/{flash-sale-id}` - View flash sale report
+- `POST /api/giveaway` - Update flash sale data (requires auth)
 
 ## Deployment Notes
 

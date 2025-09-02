@@ -26,11 +26,11 @@ async function handler(req: Request): Promise<Response> {
     });
   }
 
-  // Giveaway report pages
-  const reportMatch = path.match(/^\/report\/([a-zA-Z0-9-]+)$/);
+  // Flash sale report pages
+  const reportMatch = path.match(/^\/report\/([a-zA-Z0-9_-]+)$/);
   if (reportMatch) {
-    const giveawayId = reportMatch[1];
-    return await handleGiveawayReport(giveawayId);
+    const flashSaleId = reportMatch[1];
+    return await handleFlashSaleReport(flashSaleId);
   }
 
   // API endpoint for bot to push giveaway data
@@ -105,14 +105,14 @@ async function handleGiveawayUpdate(req: Request): Promise<Response> {
   }
 }
 
-async function handleGiveawayReport(giveawayId: string): Promise<Response> {
+async function handleFlashSaleReport(flashSaleId: string): Promise<Response> {
   try {
-    console.log(`Fetching giveaway ${giveawayId} from KV`);
+    console.log(`Fetching flash sale ${flashSaleId} from KV`);
     
     // Fetch from Deno KV
-    const result = await kv.get(["giveaways", giveawayId]);
+    const result = await kv.get(["giveaways", flashSaleId]);
     
-    console.log(`KV result for ${giveawayId}:`, result.value ? "Found" : "Not found");
+    console.log(`KV result for ${flashSaleId}:`, result.value ? "Found" : "Not found");
     
     if (!result.value) {
       // Let's also check what keys exist in KV for debugging
@@ -122,7 +122,7 @@ async function handleGiveawayReport(giveawayId: string): Promise<Response> {
       }
       console.log("Available giveaway keys in KV:", entries);
       
-      return new Response(getNotFoundPage(giveawayId), {
+      return new Response(getNotFoundPage(flashSaleId), {
         status: 404,
         headers: { "content-type": "text/html; charset=utf-8" },
       });
@@ -169,7 +169,7 @@ function generateReportPage(giveaway: any): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${giveaway.itemName} - Giveaway Report</title>
+  <title>${giveaway.itemName} - Flash Sale Report</title>
   <style>
     * {
       margin: 0;
@@ -396,7 +396,7 @@ function generateReportPage(giveaway: any): string {
     
     <div class="footer">
       <strong>Moustache Plucker Bot</strong>
-      <div class="footer-id">Giveaway ID: ${giveaway.id}</div>
+      <div class="footer-id">Flash Sale ID: ${giveaway.id}</div>
     </div>
   </div>
 </body>
@@ -450,13 +450,13 @@ function getHomePage(): string {
 </html>`;
 }
 
-function getNotFoundPage(giveawayId: string): string {
+function getNotFoundPage(flashSaleId: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Giveaway Not Found</title>
+  <title>Flash Sale Not Found</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -501,9 +501,9 @@ function getNotFoundPage(giveawayId: string): string {
 <body>
   <div class="container">
     <div class="error-icon">🔍</div>
-    <h1>Giveaway Not Found</h1>
-    <p>The giveaway report for ID:</p>
-    <p><code>${giveawayId}</code></p>
+    <h1>Flash Sale Not Found</h1>
+    <p>The flash sale report for ID:</p>
+    <p><code>${flashSaleId}</code></p>
     <p>could not be found or hasn't been synced yet.</p>
   </div>
 </body>
