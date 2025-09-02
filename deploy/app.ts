@@ -379,7 +379,7 @@ function generateReportPage(giveaway: any): string {
       
       ${giveaway.winners && giveaway.winners.length > 0 ? `
         <div class="section">
-          <h2 class="section-title">🌙 Winners</h2>
+          <h2 class="section-title">Winners:</h2>
           ${winnersList}
         </div>
       ` : ''}
@@ -444,7 +444,7 @@ function getHomePage(): string {
   <div class="container">
     <div class="moon">🌙</div>
     <h1>Moustache Plucker Bot</h1>
-    <p>Discord Giveaway Bot</p>
+    <p>a minimal rng bot</p>
   </div>
 </body>
 </html>`;
