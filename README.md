@@ -27,7 +27,9 @@ deno task init && deno task dev
 - persistent storage across restarts
 - real-time participant tracking
 
-## Commands
+## Commands (Admin Only)
+
+All commands require admin permissions (Manage Server) to use:
 
 - `/fs` - Create a new flash sale
   - Format: `/fs {item} {duration} {winners}`
@@ -35,6 +37,8 @@ deno task init && deno task dev
 - `/cancel` - Cancel an active flash sale (optional message ID, defaults to last)
 - `/end` - Manually end a flash sale early (optional message ID, defaults to last)
 - `/sync` - Sync flash sale to web report
+- `/ping` - Test bot responsiveness
+- `/hello` - sends garlic/tomato HELLO emoji art
 
 ## dev scripts + testing
 

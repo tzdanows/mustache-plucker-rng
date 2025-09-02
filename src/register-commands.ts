@@ -25,13 +25,19 @@ const commands = [
   // Ping command - simple test command
   new SlashCommandBuilder()
     .setName("ping")
-    .setDescription("Test if the bot is responsive")
+    .setDescription("Test if the bot is responsive (Admin only)")
+    .toJSON(),
+    
+  // Hello command - garlic and tomato art
+  new SlashCommandBuilder()
+    .setName("hello")
+    .setDescription("Display a garlic rectangle with HELLO in tomatoes (Admin only)")
     .toJSON(),
     
   // Flash sale command (formerly giveaway)
   new SlashCommandBuilder()
     .setName("fs")
-    .setDescription("Create a new flash sale")
+    .setDescription("Create a new flash sale (Admin only)")
     .addStringOption(option =>
       option
         .setName("item")
@@ -57,7 +63,7 @@ const commands = [
   // Cancel command
   new SlashCommandBuilder()
     .setName("cancel")
-    .setDescription("Cancel an active flash sale")
+    .setDescription("Cancel an active flash sale (Admin only)")
     .addStringOption(option =>
       option
         .setName("message_id")
@@ -69,7 +75,7 @@ const commands = [
   // End command
   new SlashCommandBuilder()
     .setName("end")
-    .setDescription("Manually end a flash sale early")
+    .setDescription("Manually end a flash sale early (Admin only)")
     .addStringOption(option =>
       option
         .setName("message_id")
@@ -81,7 +87,7 @@ const commands = [
   // Sync command
   new SlashCommandBuilder()
     .setName("sync")
-    .setDescription("Sync giveaway data to web report")
+    .setDescription("Sync giveaway data to web report (Admin only)")
     .addStringOption(option =>
       option
         .setName("giveaway_id")

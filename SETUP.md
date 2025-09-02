@@ -41,7 +41,9 @@ commands work immediately after global propagation.
 
 ---
 
-## Commands
+## Commands (Admin Only)
+
+All commands require admin permissions (Manage Server):
 
 ```
 /fs Prize $50 5m 3    # create flash sale
@@ -49,4 +51,5 @@ commands work immediately after global propagation.
 /end                  # end last flash sale early
 /sync                 # sync to web
 /ping                 # test bot
+/hello                # art
 ```

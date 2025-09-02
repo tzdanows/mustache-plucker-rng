@@ -56,6 +56,10 @@ export class InteractionHandler {
         await this.handlePingCommand(interaction);
         break;
         
+      case "hello":
+        await this.handleHelloCommand(interaction);
+        break;
+        
       case "fs":
         await this.handleFlashSaleCommand(interaction);
         break;
@@ -88,6 +92,19 @@ export class InteractionHandler {
    * /ping command - Simple test command
    */
   private async handlePingCommand(interaction: CommandInteraction): Promise<void> {
+    // Check if user has admin permissions
+    const member = interaction.member;
+    const isAdmin = member && typeof member.permissions === "object" && 
+                   member.permissions.has("ManageGuild");
+    
+    if (!isAdmin) {
+      await interaction.reply({
+        content: "❌ You need admin permissions to use this command.",
+        ephemeral: true,
+      });
+      return;
+    }
+    
     const latency = Date.now() - interaction.createdTimestamp;
     const apiLatency = Math.round(interaction.client.ws.ping);
     
@@ -98,9 +115,57 @@ export class InteractionHandler {
   }
   
   /**
+   * /hello command - Display garlic rectangle with HELLO in tomatoes
+   */
+  private async handleHelloCommand(interaction: CommandInteraction): Promise<void> {
+    // Check if user has admin permissions
+    const member = interaction.member;
+    const isAdmin = member && typeof member.permissions === "object" && 
+                   member.permissions.has("ManageGuild");
+    
+    if (!isAdmin) {
+      await interaction.reply({
+        content: "❌ You need admin permissions to use this command.",
+        ephemeral: true,
+      });
+      return;
+    }
+    
+    // Display garlic rectangle with HELLO spelled in tomatoes
+    const message = 
+      "🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄\n" +
+      "🧄🍅🧄🧄🍅🧄🍅🍅🍅🧄🍅🧄🧄🍅🧄🧄🧄🍅🍅🍅🧄🧄\n" +
+      "🧄🍅🧄🧄🍅🧄🍅🧄🧄🧄🍅🧄🧄🍅🧄🧄🍅🧄🧄🧄🍅🧄\n" +
+      "🧄🍅🧄🧄🍅🧄🍅🧄🧄🧄🍅🧄🧄🍅🧄🧄🍅🧄🧄🧄🍅🧄\n" +
+      "🧄🍅🍅🍅🍅🧄🍅🍅🍅🧄🍅🧄🧄🍅🧄🧄🍅🧄🧄🧄🍅🧄\n" +
+      "🧄🍅🧄🧄🍅🧄🍅🧄🧄🧄🍅🧄🧄🍅🧄🧄🍅🧄🧄🧄🍅🧄\n" +
+      "🧄🍅🧄🧄🍅🧄🍅🧄🧄🧄🍅🧄🧄🍅🧄🧄🍅🧄🧄🧄🍅🧄\n" +
+      "🧄🍅🧄🧄🍅🧄🍅🍅🍅🧄🍅🍅🧄🍅🍅🧄🧄🍅🍅🍅🧄🧄\n" +
+      "🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄🧄\n" +
+      "-# mobile users --> turn your phone sideways";
+    
+    await interaction.reply({
+      content: message,
+    });
+  }
+  
+  /**
    * /fs command - Create a new flash sale
    */
   private async handleFlashSaleCommand(interaction: ChatInputCommandInteraction): Promise<void> {
+    // Check if user has admin permissions
+    const member = interaction.member;
+    const isAdmin = member && typeof member.permissions === "object" && 
+                   member.permissions.has("ManageGuild");
+    
+    if (!isAdmin) {
+      await interaction.reply({
+        content: "❌ You need admin permissions to use this command.",
+        ephemeral: true,
+      });
+      return;
+    }
+    
     // Defer reply since this might take a moment
     await interaction.deferReply();
     
@@ -230,15 +295,14 @@ export class InteractionHandler {
         return;
       }
       
-      // Check permissions (only creator or admins can cancel)
+      // Check permissions (admins only)
       const member = interaction.member;
-      const isCreator = giveaway.creator_id === interaction.user.id;
       const isAdmin = member && typeof member.permissions === "object" && 
                      member.permissions.has("ManageGuild");
       
-      if (!isCreator && !isAdmin) {
+      if (!isAdmin) {
         await interaction.editReply({
-          content: "❌ You don't have permission to cancel this flash sale.",
+          content: "❌ You need admin permissions to use this command.",
         });
         return;
       }
@@ -276,6 +340,19 @@ export class InteractionHandler {
    * /end command - Manually end a flash sale
    */
   private async handleEndCommand(interaction: ChatInputCommandInteraction): Promise<void> {
+    // Check if user has admin permissions
+    const member = interaction.member;
+    const isAdmin = member && typeof member.permissions === "object" && 
+                   member.permissions.has("ManageGuild");
+    
+    if (!isAdmin) {
+      await interaction.reply({
+        content: "❌ You need admin permissions to use this command.",
+        ephemeral: true,
+      });
+      return;
+    }
+    
     const messageId = interaction.options.getString("message_id");
     
     await interaction.deferReply({ ephemeral: true });
@@ -328,6 +405,19 @@ export class InteractionHandler {
    * /sync command - Sync giveaway to web report
    */
   private async handleSyncCommand(interaction: ChatInputCommandInteraction): Promise<void> {
+    // Check if user has admin permissions
+    const member = interaction.member;
+    const isAdmin = member && typeof member.permissions === "object" && 
+                   member.permissions.has("ManageGuild");
+    
+    if (!isAdmin) {
+      await interaction.reply({
+        content: "❌ You need admin permissions to use this command.",
+        ephemeral: true,
+      });
+      return;
+    }
+    
     await interaction.deferReply({ ephemeral: true });
     
     const specificId = interaction.options.getString("giveaway_id");
