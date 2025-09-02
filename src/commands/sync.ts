@@ -52,7 +52,7 @@ export default {
       logger.info(`Manually syncing giveaway ${giveaway.id}`);
       await deploySync.syncGiveaway(giveaway.id);
       
-      const deployUrl = Deno.env.get("DEPLOY_URL") || "http://localhost:8432";
+      const deployUrl = Deno.env.get("DEPLOY_URL") || "https://mustache-plucker.deno.dev";
       const reportUrl = `${deployUrl}/report/${giveaway.id}`;
       
       await interaction.editReply({

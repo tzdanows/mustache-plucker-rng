@@ -7,5 +7,15 @@
   "imports": {
     "@std/http": "jsr:@std/http@^1.0.0"
   },
-  "unstable": ["kv"]
+  "unstable": [
+    "kv"
+  ],
+  "deploy": {
+    "project": "39626039-1064-4144-9dc5-270608bfd630",
+    "exclude": [
+      "**/node_modules"
+    ],
+    "include": [],
+    "entrypoint": "app.ts"
+  }
 }

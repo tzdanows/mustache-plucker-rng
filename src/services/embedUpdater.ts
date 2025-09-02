@@ -10,6 +10,7 @@ export class EmbedUpdater {
   private activeGiveaways: Map<string, { giveaway: any, lastUpdate: number }> = new Map();
   private messageCache: Map<string, any> = new Map();
   private lastUpdateTime: Map<string, number> = new Map();
+  private endingGiveaways: Set<string> = new Set();
 
   constructor(client: Client) {
     this.client = client;
@@ -48,6 +49,11 @@ export class EmbedUpdater {
 
   removeGiveaway(giveawayId: string): void {
     this.activeGiveaways.delete(giveawayId);
+    this.endingGiveaways.add(giveawayId);
+    // Clear from ending set after 5 seconds to be safe
+    setTimeout(() => {
+      this.endingGiveaways.delete(giveawayId);
+    }, 5000);
   }
 
   private async updateActiveGiveaways(): Promise<void> {
@@ -70,6 +76,11 @@ export class EmbedUpdater {
   private async updateGiveawayEmbed(giveaway: any): Promise<void> {
     try {
       if (!giveaway.message_id) return;
+      
+      // Skip if this giveaway is currently ending
+      if (this.endingGiveaways.has(giveaway.id)) {
+        return;
+      }
       
       // Intelligent rate limiting based on time remaining
       const endsAtMs = new Date(giveaway.ends_at).getTime();

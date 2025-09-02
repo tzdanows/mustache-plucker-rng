@@ -121,8 +121,8 @@ export class GiveawayManager {
         bot.embedUpdater.removeGiveaway(giveaway.id);
       }
       
-      // Small delay to ensure embed updater has stopped
-      await new Promise(resolve => setTimeout(resolve, 100));
+      // Longer delay to ensure embed updater has completely stopped
+      await new Promise(resolve => setTimeout(resolve, 500));
       
       // Get participants BEFORE updating status
       const participants = await getGiveawayParticipants(giveaway.id);
@@ -198,7 +198,14 @@ export class GiveawayManager {
       // Update original message to show it ended with results link
       if (giveaway.message_id) {
         try {
-          const originalMessage = await channel.messages.fetch(giveaway.message_id);
+          logger.info(`Fetching message ${giveaway.message_id} to update embed`);
+          const originalMessage = await channel.messages.fetch(giveaway.message_id, { force: true });
+          
+          if (!originalMessage) {
+            logger.error(`Message ${giveaway.message_id} not found`);
+            return;
+          }
+          
           const titleText = giveaway.item_name;  // Title without bold
           
           const endedTimestamp = Math.floor(Date.now() / 1000);
@@ -220,10 +227,28 @@ export class GiveawayManager {
             .setFooter({ text: "react with 🌙 to enter" })  // Keep original footer
             .setTimestamp(new Date(giveaway.ends_at));  // Keep original timestamp
           
+          logger.info(`Updating embed for giveaway ${giveaway.id}`);
           await originalMessage.edit({ embeds: [updatedEmbed] });
+          logger.info(`Successfully updated embed for giveaway ${giveaway.id}`);
+          
+          // Double-check that the edit persisted after a short delay
+          setTimeout(async () => {
+            try {
+              const checkMessage = await channel.messages.fetch(giveaway.message_id, { force: true });
+              const currentEmbed = checkMessage.embeds[0];
+              if (currentEmbed && !currentEmbed.description?.includes("winner(s):")) {
+                logger.warn(`Embed was overwritten after update, re-applying final embed`);
+                await checkMessage.edit({ embeds: [updatedEmbed] });
+              }
+            } catch (e) {
+              logger.error(`Failed to verify embed update:`, e);
+            }
+          }, 1500);
         } catch (error) {
-          logger.warn("Could not update original giveaway message:", error);
+          logger.error(`Failed to update giveaway embed for ${giveaway.id}:`, error);
         }
+      } else {
+        logger.warn(`No message_id for giveaway ${giveaway.id}`);
       }
 
       // Send individual congratulations messages for each winner
@@ -256,7 +281,7 @@ export class GiveawayManager {
       // Update original message if it exists
       if (giveaway.message_id) {
         try {
-          const originalMessage = await channel.messages.fetch(giveaway.message_id);
+          const originalMessage = await channel.messages.fetch(giveaway.message_id, { force: true });
           const titleText = giveaway.item_name;
           
           const endedTimestamp = Math.floor(Date.now() / 1000);

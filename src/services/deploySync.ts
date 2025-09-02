@@ -9,9 +9,8 @@ export class DeploySync {
 
   constructor(client: Client) {
     this.client = client;
-    // Use localhost for local testing, or production URL
-    const isLocal = Deno.env.get("NODE_ENV") === "development";
-    this.deployUrl = Deno.env.get("DEPLOY_URL") || (isLocal ? "http://localhost:8432" : "https://mustache-plucker.deno.dev");
+    // Use the configured URL, defaulting to production
+    this.deployUrl = Deno.env.get("DEPLOY_URL") || "https://mustache-plucker.deno.dev";
     this.authToken = Deno.env.get("DEPLOY_SECRET") || "mustacherngpluckernightcaps2025";
     
     logger.info(`DeploySync configured for: ${this.deployUrl}`);
