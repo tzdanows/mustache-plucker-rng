@@ -23,7 +23,7 @@ deno task init && deno task dev
 
 - react-to-enter flash sale
 - secure random selection
-- Multiple winners per flash sale
+- multiple winners per flash sale
 - persistent storage across restarts
 - real-time participant tracking
 
@@ -38,8 +38,8 @@ deno task init && deno task dev
 
 ## dev scripts + testing
 
-- `deno task dev` - Start development bot
-- `deno task test` - Run quick tests
-- `deno task test:full` - Run all tests
-- `deno task build` - Build for production
-- `deno task init` - Initialize database
+- `deno task dev` - start development bot
+- `deno task test` - run quick tests
+- `deno task test:full` - run all tests
+- `deno task build` - build for production
+- `deno task init` - init database

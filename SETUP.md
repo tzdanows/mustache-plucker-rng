@@ -1,6 +1,6 @@
 # Setup Guide
 
-## Initial Setup
+## Initial Setup (if self hosting, if not skip)
 
 ### 1. Configure Environment
 ```bash
@@ -25,7 +25,7 @@ Bot now works in ALL servers.
 
 ---
 
-## Adding to New Server
+## Adding to New Server (if I'm hosting)
 
 **Invite link:**
 ```
@@ -37,16 +37,16 @@ https://discord.com/oauth2/authorize?client_id=1411869206575583352
 3. Authorize
 4. Done
 
-Commands work immediately after global propagation.
+commands work immediately after global propagation.
 
 ---
 
 ## Commands
 
 ```
-/fs Prize $50 5m 3    # Create flash sale
-/cancel               # Cancel last flash sale
-/end                  # End last flash sale early
-/sync                 # Sync to web
-/ping                 # Test bot
+/fs Prize $50 5m 3    # create flash sale
+/cancel               # cancel last flash sale
+/end                  # end last flash sale early
+/sync                 # sync to web
+/ping                 # test bot
 ```
