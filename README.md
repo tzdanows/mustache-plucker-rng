@@ -15,20 +15,30 @@ deno task init && deno task dev
 - Multiple winners per giveaway
 - persistent storage across restarts
 - real-time participant tracking
-- toggle on no B2B winners via: `/toggle b2b`
 
 ## Commands
 
-- `/giveaway create` - start a new giveaway
-  - `giveaway create {item & amount} {time left} {winner(s) quantity}`
-  - `giveaway create pumpkin $20 45s 3`
-- `/giveaway end` - manually end and draw winners
-- `/giveaway list` - view active giveaways
-- `/giveaway cancel` - cancel a giveaway (or last by default)
+- `/giveaway` - Create a new giveaway
+  - Format: `/giveaway {item} {duration} {winners}`
+  - Example: `/giveaway Keycap Set $75 5m 3`
+- `/cancel` - Cancel an active giveaway by message ID
+- `/end` - Manually end a giveaway early
+- `/sync` - Sync giveaway to web report
+
+## Testing
+
+```bash
+# fast
+deno task test
+
+#full
+deno task test:full
+```
 
 ## Development
 
 - `deno task dev` - Start development bot
-- `deno task test` - Run tests
+- `deno task test` - Run quick tests
+- `deno task test:full` - Run all tests
 - `deno task build` - Build for production
-- `deno task deploy` - Deploy to production
+- `deno task init` - Initialize database
