@@ -4,11 +4,15 @@ import { logger } from "../utils/logger.ts";
 import type { SlashCommand } from "../types/discord.ts";
 import { GiveawayManager } from "../services/giveawayManager.ts";
 import { EmbedUpdater } from "../services/embedUpdater.ts";
+import { InteractionHandler } from "../handlers/interactionHandler.ts";
+import { DeploySync } from "../services/deploySync.ts";
 
 export class MoustachePluckerBot extends Client {
   commands: Collection<string, SlashCommand>;
   giveawayManager: GiveawayManager;
   embedUpdater: EmbedUpdater;
+  interactionHandler: InteractionHandler;
+  deploySync: DeploySync;
 
   constructor() {
     super({
@@ -23,6 +27,8 @@ export class MoustachePluckerBot extends Client {
     this.commands = new Collection();
     this.giveawayManager = new GiveawayManager(this);
     this.embedUpdater = new EmbedUpdater(this);
+    this.interactionHandler = new InteractionHandler();
+    this.deploySync = new DeploySync(this);
   }
 
   async start(): Promise<void> {

@@ -38,9 +38,10 @@ export function validateConfig(): void {
     errors.push("DISCORD_CLIENT_ID is required");
   }
 
-  if (config.environment.nodeEnv === "development" && !config.discord.guildId) {
-    errors.push("DISCORD_GUILD_ID is required for development mode");
-  }
+  // Guild ID is now optional for global commands
+  // if (config.environment.nodeEnv === "development" && !config.discord.guildId) {
+  //   errors.push("DISCORD_GUILD_ID is required for development mode");
+  // }
 
   if (errors.length > 0) {
     console.error("Configuration errors:");

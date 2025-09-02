@@ -6,9 +6,17 @@ import type { MoustachePluckerBot } from "../bot/client.ts";
 export default {
   name: Events.InteractionCreate,
   async execute(interaction: Interaction) {
+    const client = interaction.client as MoustachePluckerBot;
+    
+    // Use the new interaction handler if available
+    if (client.interactionHandler) {
+      await client.interactionHandler.handleInteraction(interaction);
+      return;
+    }
+    
+    // Fallback to old command system
     if (!interaction.isChatInputCommand()) return;
 
-    const client = interaction.client as MoustachePluckerBot;
     const command = client.commands.get(interaction.commandName);
 
     if (!command) {

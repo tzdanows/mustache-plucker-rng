@@ -1,6 +1,6 @@
 # Moustache Plucker Bot
 
-minimal discord RNG giveaway bot that "plucks" random winners from reactions
+minimal discord RNG flash sale bot that "plucks" random winners from reactions
 
 optimized for rapid reactions via concurrency
 
@@ -22,20 +22,20 @@ deno task init && deno task dev
 
 ## Features
 
-- react-to-enter giveaways
+- react-to-enter listings
 - secure random selection
-- Multiple winners per giveaway
+- Multiple winners per listing
 - persistent storage across restarts
 - real-time participant tracking
 
 ## Commands
 
-- `/giveaway` - Create a new giveaway
-  - Format: `/giveaway {item} {duration} {winners}`
-  - Example: `/giveaway Keycap Set $75 5m 3`
-- `/cancel` - Cancel an active giveaway by message ID
-- `/end` - Manually end a giveaway early
-- `/sync` - Sync giveaway to web report
+- `/fs` - Create a new flash sale
+  - Format: `/fs {item} {duration} {winners}`
+  - Example: `/fs Keycap Set $75 5m 3`
+- `/cancel` - Cancel an active flash sale (optional message ID, defaults to last)
+- `/end` - Manually end a flash sale early (optional message ID, defaults to last)
+- `/sync` - Sync flash sale to web report
 
 ## Testing
 

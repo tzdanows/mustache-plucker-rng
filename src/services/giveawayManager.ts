@@ -26,7 +26,7 @@ export class GiveawayManager {
     // Initial check and schedule existing giveaways
     this.scheduleExistingGiveaways();
     
-    logger.info("Giveaway manager started (using precise timers for ending)");
+    logger.info("Flash sale manager started (using precise timers for ending)");
   }
   
   private async scheduleExistingGiveaways(): Promise<void> {
@@ -85,7 +85,7 @@ export class GiveawayManager {
       clearInterval(this.checkInterval);
       this.checkInterval = null;
     }
-    logger.info("Giveaway manager stopped");
+    logger.info("Flash sale manager stopped");
   }
 
   private async checkEndedGiveaways(): Promise<void> {
@@ -113,7 +113,7 @@ export class GiveawayManager {
 
   async endGiveaway(giveaway: any): Promise<void> {
     try {
-      logger.info(`Ending giveaway ${giveaway.id} for ${giveaway.item_name}`);
+      logger.info(`Ending flash sale ${giveaway.id} for ${giveaway.item_name}`);
       
       // Stop the embed updater from updating this giveaway
       const bot = this.client as any;
@@ -155,7 +155,7 @@ export class GiveawayManager {
       // NOW update giveaway status after everything is done
       await this.updateGiveawayStatus(giveaway.id, "ended");
       
-      logger.info(`Giveaway ${giveaway.id} ended with ${winners.length} winners`);
+      logger.info(`Flash sale ${giveaway.id} ended with ${winners.length} winners`);
     } catch (error) {
       logger.error(`Failed to end giveaway ${giveaway.id}:`, error);
       // Even if there's an error, the status is already set to "ended"
@@ -199,7 +199,7 @@ export class GiveawayManager {
       if (giveaway.message_id) {
         try {
           logger.info(`Fetching message ${giveaway.message_id} to update embed`);
-          const originalMessage = await channel.messages.fetch(giveaway.message_id, { force: true });
+          const originalMessage = await channel.messages.fetch(giveaway.message_id);
           
           if (!originalMessage) {
             logger.error(`Message ${giveaway.message_id} not found`);
@@ -218,7 +218,7 @@ export class GiveawayManager {
             winnerText = `${winnerMentions} ${nulls}`;
           }
           
-          const description = `plucking in: Ended @ <t:${endedTimestamp}:f>\nentries: \`${allParticipants.length}\`\nwinner(s): ${winnerText}\n[giveaway results](${summaryUrl})`;
+          const description = `plucking in: Ended @ <t:${endedTimestamp}:f>\nentries: \`${allParticipants.length}\`\nwinner(s): ${winnerText}\n[results page](${summaryUrl})`;
           
           const updatedEmbed = new EmbedBuilder()
             .setTitle(titleText)
@@ -234,7 +234,7 @@ export class GiveawayManager {
           // Double-check that the edit persisted after a short delay
           setTimeout(async () => {
             try {
-              const checkMessage = await channel.messages.fetch(giveaway.message_id, { force: true });
+              const checkMessage = await channel.messages.fetch(giveaway.message_id);
               const currentEmbed = checkMessage.embeds[0];
               if (currentEmbed && !currentEmbed.description?.includes("winner(s):")) {
                 logger.warn(`Embed was overwritten after update, re-applying final embed`);
@@ -281,7 +281,7 @@ export class GiveawayManager {
       // Update original message if it exists
       if (giveaway.message_id) {
         try {
-          const originalMessage = await channel.messages.fetch(giveaway.message_id, { force: true });
+          const originalMessage = await channel.messages.fetch(giveaway.message_id);
           const titleText = giveaway.item_name;
           
           const endedTimestamp = Math.floor(Date.now() / 1000);
@@ -291,7 +291,7 @@ export class GiveawayManager {
           // Sync to Deno Deploy even with no winners
           await this.deploySync.syncGiveaway(giveaway.id);
           
-          const description = `plucking in: Ended @ <t:${endedTimestamp}:f>\nentries: \`0\`\nwinner(s): No entries\n[giveaway results](${summaryUrl})`;
+          const description = `plucking in: Ended @ <t:${endedTimestamp}:f>\nentries: \`0\`\nwinner(s): No entries\n[results page](${summaryUrl})`;
           
           const updatedEmbed = new EmbedBuilder()
             .setTitle(titleText)

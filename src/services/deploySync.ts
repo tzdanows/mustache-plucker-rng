@@ -93,10 +93,13 @@ export class DeploySync {
       const responseText = await response.text();
       
       if (!response.ok) {
+        logger.error(`Deploy sync failed for ${giveawayId}: ${response.status} ${response.statusText}`);
+        logger.error(`Response body: ${responseText}`);
         throw new Error(`Deploy sync failed: ${response.status} ${response.statusText} - ${responseText}`);
       }
       
       logger.info(`Successfully synced giveaway ${giveawayId} to Deno Deploy: ${responseText}`);
+      logger.info(`View report at: ${this.deployUrl}/report/${giveawayId}`);
       
     } catch (error) {
       logger.error(`Failed to sync giveaway ${giveawayId}:`, error);

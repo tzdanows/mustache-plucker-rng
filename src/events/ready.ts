@@ -21,12 +21,16 @@ export default {
     bot.giveawayManager.start();
     bot.embedUpdater.start();
     
-    // Deploy slash commands
+    // Deploy slash commands - DISABLED
+    // We now use src/register-commands.ts manually instead
+    // to avoid re-registering old commands on every startup
+    /*
     try {
       await deployCommands();
       logger.info("Slash commands deployed successfully");
     } catch (error) {
       logger.error("Failed to deploy slash commands:", error);
     }
+    */
   },
 };
