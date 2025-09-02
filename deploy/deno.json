@@ -1,0 +1,11 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-net --allow-env --unstable-kv --watch app.ts",
+    "deploy": "deployctl deploy --project=mustache-plucker app.ts",
+    "preview": "deployctl deploy --project=mustache-plucker --dry-run app.ts"
+  },
+  "imports": {
+    "@std/http": "jsr:@std/http@^1.0.0"
+  },
+  "unstable": ["kv"]
+}

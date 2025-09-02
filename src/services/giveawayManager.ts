@@ -3,15 +3,18 @@ import { getDatabase } from "../db/database.ts";
 import { logger } from "../utils/logger.ts";
 import { selectRandomWinners } from "../utils/random.ts";
 import { getGiveawayParticipants } from "../db/giveawayRepository.ts";
+import { DeploySync } from "./deploySync.ts";
 
 export class GiveawayManager {
   private client: Client;
   private checkInterval: number | null = null;
   private scheduledEndings: Map<string, number> = new Map();
   private processingGiveaways: Set<string> = new Set();
+  private deploySync: DeploySync;
 
   constructor(client: Client) {
     this.client = client;
+    this.deploySync = new DeploySync(client);
   }
 
   start(): void {
@@ -131,14 +134,23 @@ export class GiveawayManager {
         return;
       }
 
-      // Select winners
-      const winners = selectRandomWinners(participants, giveaway.winner_count);
+      // Handle case where there are fewer participants than requested winners
+      const actualWinnerCount = Math.min(participants.length, giveaway.winner_count);
+      const notEnoughEntries = participants.length < giveaway.winner_count;
+      
+      // Select winners (will be all participants if not enough entries)
+      const winners = selectRandomWinners(participants, actualWinnerCount);
+      
+      // Log if not enough entries
+      if (notEnoughEntries) {
+        logger.info(`Giveaway ${giveaway.id}: Only ${participants.length} entries for ${giveaway.winner_count} requested winners`);
+      }
       
       // Save winners to database
       await this.saveWinners(giveaway.id, winners);
       
       // Announce winners (this updates the original embed)
-      await this.announceWinners(giveaway, winners);
+      await this.announceWinners(giveaway, winners, notEnoughEntries);
       
       // NOW update giveaway status after everything is done
       await this.updateGiveawayStatus(giveaway.id, "ended");
@@ -166,7 +178,7 @@ export class GiveawayManager {
     db.prepare("UPDATE giveaways SET status = ? WHERE id = ?").run(status, giveawayId);
   }
 
-  private async announceWinners(giveaway: any, winners: string[]): Promise<void> {
+  private async announceWinners(giveaway: any, winners: string[], notEnoughEntries: boolean = false): Promise<void> {
     try {
       const channel = await this.client.channels.fetch(giveaway.channel_id) as TextChannel;
       if (!channel) return;
@@ -174,8 +186,14 @@ export class GiveawayManager {
       const winnerMentions = winners.map(id => `<@${id}>`).join(" ");
       const allParticipants = await getGiveawayParticipants(giveaway.id);
       
-      // Generate plucking summary page URL
-      const summaryUrl = `http://localhost:8081/giveaway/${giveaway.id}`;
+      // Generate plucking summary page URL - use Deno Deploy URL
+      const deployUrl = Deno.env.get("DEPLOY_URL") || "https://mustache-plucker.deno.dev";
+      const summaryUrl = `${deployUrl}/report/${giveaway.id}`;
+      
+      // Sync to Deno Deploy
+      logger.info(`Attempting to sync giveaway ${giveaway.id} to deploy service`);
+      await this.deploySync.syncGiveaway(giveaway.id);
+      logger.info(`Sync complete for giveaway ${giveaway.id}`);
       
       // Update original message to show it ended with results link
       if (giveaway.message_id) {
@@ -184,7 +202,16 @@ export class GiveawayManager {
           const titleText = giveaway.item_name;  // Title without bold
           
           const endedTimestamp = Math.floor(Date.now() / 1000);
-          const description = `plucking in: Ended @ <t:${endedTimestamp}:f>\nentries: \`${allParticipants.length}\`\nwinner(s): ${winnerMentions || "No winners"}\n[giveaway results](${summaryUrl})`;
+          
+          // If not enough entries, pad with "null" for missing winners
+          let winnerText = winnerMentions || "No winners";
+          if (notEnoughEntries && winners.length > 0) {
+            const nullCount = giveaway.winner_count - winners.length;
+            const nulls = Array(nullCount).fill("null").join(" ");
+            winnerText = `${winnerMentions} ${nulls}`;
+          }
+          
+          const description = `plucking in: Ended @ <t:${endedTimestamp}:f>\nentries: \`${allParticipants.length}\`\nwinner(s): ${winnerText}\n[giveaway results](${summaryUrl})`;
           
           const updatedEmbed = new EmbedBuilder()
             .setTitle(titleText)
@@ -201,6 +228,14 @@ export class GiveawayManager {
 
       // Send individual congratulations messages for each winner
       if (winners.length > 0) {
+        // If not enough entries, send a single message
+        if (notEnoughEntries) {
+          await channel.send(
+            `⚠️ **Not enough entries** - Only ${winners.length} out of ${giveaway.winner_count} requested winners`
+          );
+        }
+        
+        // Send individual winner messages
         for (const winnerId of winners) {
           await channel.send(
             `🎊 Congratulations <@${winnerId}>! 🎊\n` +
@@ -225,7 +260,12 @@ export class GiveawayManager {
           const titleText = giveaway.item_name;
           
           const endedTimestamp = Math.floor(Date.now() / 1000);
-          const summaryUrl = `http://localhost:8081/giveaway/${giveaway.id}`;
+          const deployUrl = Deno.env.get("DEPLOY_URL") || "https://mustache-plucker.deno.dev";
+          const summaryUrl = `${deployUrl}/report/${giveaway.id}`;
+          
+          // Sync to Deno Deploy even with no winners
+          await this.deploySync.syncGiveaway(giveaway.id);
+          
           const description = `plucking in: Ended @ <t:${endedTimestamp}:f>\nentries: \`0\`\nwinner(s): No entries\n[giveaway results](${summaryUrl})`;
           
           const updatedEmbed = new EmbedBuilder()

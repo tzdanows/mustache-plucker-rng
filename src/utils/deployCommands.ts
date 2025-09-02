@@ -13,6 +13,7 @@ export async function deployCommands(): Promise<void> {
     "../commands/list.ts",
     "../commands/ping.ts",
     "../commands/stats.ts",
+    "../commands/sync.ts",
   ];
 
   for (const file of commandFiles) {

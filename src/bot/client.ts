@@ -83,6 +83,7 @@ export class MoustachePluckerBot extends Client {
       "list.ts",
       "ping.ts",
       "stats.ts",
+      "sync.ts",
     ];
 
     for (const file of commandFiles) {

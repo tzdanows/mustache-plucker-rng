@@ -16,15 +16,15 @@ export class EmbedUpdater {
   }
 
   start(): void {
-    // Update embeds every 3 seconds - balance between responsiveness and API limits
+    // Check giveaways every second, but each giveaway has its own intelligent rate limit
     this.updateInterval = setInterval(() => {
       this.updateActiveGiveaways();
-    }, 3000);
+    }, 1000);
 
     // Initial update
     this.updateActiveGiveaways();
     
-    logger.info("Embed updater started (3s interval for smooth updates)");
+    logger.info("Embed updater started (intelligent update frequency based on time remaining)");
   }
 
   stop(): void {
@@ -71,9 +71,25 @@ export class EmbedUpdater {
     try {
       if (!giveaway.message_id) return;
       
-      // Rate limit: Don't update the same message more than once per 2 seconds
+      // Intelligent rate limiting based on time remaining
+      const endsAtMs = new Date(giveaway.ends_at).getTime();
+      const now = Date.now();
+      const timeLeft = endsAtMs - now;
       const lastUpdate = this.lastUpdateTime.get(giveaway.id) || 0;
-      if (Date.now() - lastUpdate < 2000) {
+      
+      // Update more frequently as deadline approaches
+      let minUpdateInterval: number;
+      if (timeLeft < 10000) { // Last 10 seconds - update every second
+        minUpdateInterval = 1000;
+      } else if (timeLeft < 60000) { // Last minute - update every 2 seconds
+        minUpdateInterval = 2000;
+      } else if (timeLeft < 300000) { // Last 5 minutes - update every 3 seconds
+        minUpdateInterval = 3000;
+      } else { // More than 5 minutes - update every 5 seconds
+        minUpdateInterval = 5000;
+      }
+      
+      if (now - lastUpdate < minUpdateInterval) {
         return;
       }
 

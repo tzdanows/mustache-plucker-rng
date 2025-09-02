@@ -8,7 +8,7 @@ export default {
   async execute(interaction: CommandInteraction) {
     const latency = Date.now() - interaction.createdTimestamp;
     await interaction.reply({
-      content: `🎩 Pong! Latency: ${latency}ms | Websocket: ${Math.round(interaction.client.ws.ping)}ms`,
+      content: `🌙 Pong! Latency: ${latency}ms | Websocket: ${Math.round(interaction.client.ws.ping)}ms`,
       ephemeral: true,
     });
   },

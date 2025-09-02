@@ -3,7 +3,7 @@
 import { ensureDir } from "@std/fs/ensure-dir";
 import { join } from "@std/path";
 
-console.log("🎩 Moustache Plucker Bot - Setup Script\n");
+console.log("🌙 Moustache Plucker Bot - Setup Script\n");
 
 // Check if .env already exists
 const envPath = ".env";

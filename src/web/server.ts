@@ -378,7 +378,7 @@ export class WebServer {
 </head>
 <body>
   <div class="container">
-    <div class="moustache">🎩</div>
+    <div class="moustache">🌙</div>
     <h1>Moustache Plucker Bot</h1>
     <p>Discord Giveaway Bot</p>
   </div>

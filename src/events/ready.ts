@@ -11,7 +11,7 @@ export default {
     
     const bot = client as MoustachePluckerBot;
     
-    logger.info(`🎩 Moustache Plucker Bot is ready! Logged in as ${client.user.tag}`);
+    logger.info(`🌙 Moustache Plucker Bot is ready! Logged in as ${client.user.tag}`);
     logger.info(`Serving ${client.guilds.cache.size} guild(s)`);
     
     // Set bot status
