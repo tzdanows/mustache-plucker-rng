@@ -26,11 +26,17 @@ RUN addgroup -g 1001 -S deno && \
 USER deno
 
 # Pre-cache the main module and dependencies
-RUN deno cache src/main.ts
+RUN deno cache src/main.ts src/health-server.ts
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD deno run --allow-env src/health-check.ts || exit 1
+# Create a startup script
+RUN echo '#!/bin/sh\n\
+deno run --allow-net --allow-env --allow-read --allow-write src/health-server.ts &\n\
+exec deno run --allow-net --allow-env --allow-read --allow-write src/main.ts' > /app/start.sh && \
+    chmod +x /app/start.sh
 
-# Run the bot
-CMD ["deno", "run", "--allow-net", "--allow-env", "--allow-read", "--allow-write", "src/main.ts"]
+# Health check using the health server
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3001/ping || exit 1
+
+# Run both the health server and the bot
+CMD ["/app/start.sh"]

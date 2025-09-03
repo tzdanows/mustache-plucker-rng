@@ -9,6 +9,8 @@ services:
     restart: unless-stopped
     env_file:
       - .env
+    ports:
+      - "3001:3001"  # Health check server port
     volumes:
       # Persist database between container restarts
       - ./data:/app/data
