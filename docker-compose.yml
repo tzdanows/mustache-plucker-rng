@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mustache-plucker-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      # Persist database between container restarts
+      - ./data:/app/data
+      # Mount source code for development (optional - remove for production)
+      # - ./src:/app/src:ro
+      # - ./deno.json:/app/deno.json:ro
+    environment:
+      - TZ=America/New_York  # Set your timezone
+      - DATABASE_PATH=/app/data/moustache_plucker.db
+    networks:
+      - bot-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    # Resource limits (adjust based on your mini-pc specs)
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  bot-network:
+    driver: bridge
+
+# Optional: Add this for automatic backups
+volumes:
+  bot-data:
+    driver: local
