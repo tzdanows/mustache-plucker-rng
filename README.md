@@ -9,9 +9,10 @@
 ### Invite
 
 ```md
-https://discord.com/oauth2/authorize?client_id=1411869206575583352
-# should be ready for usage post invite
+https://discord.com/oauth2/authorize?client_id=1411869206575583352&permissions=76864&scope=bot%20applications.commands
 ```
+should be ready for usage out of the box
+
 
 ### Clone & run (self-hosted)
 
