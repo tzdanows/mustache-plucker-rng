@@ -263,7 +263,7 @@ export class GiveawayManager {
         // Send individual winner messages
         for (const winnerId of winners) {
           await channel.send(
-            `# 🎊🧄 Congratulations <@${winnerId}>! 🍅🎊\n` +
+            `## 🎊🧄 Congratulations <@${winnerId}>! 🍅🎊\n` +
             `> Please dm your paypal address to <@${giveaway.creator_id}> to claim: **${giveaway.item_name}**!`
           );
         }
