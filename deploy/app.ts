@@ -399,7 +399,7 @@ function generateReportPage(giveaway: any): string {
     </div>
     
     <div class="footer">
-      <strong>Moustache Plucker Bot</strong>
+      <strong>Moustache Plucker</strong>
       <div class="footer-id">Flash Sale ID: ${giveaway.id}</div>
     </div>
   </div>
@@ -413,7 +413,7 @@ function getHomePage(): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Moustache Plucker Bot</title>
+  <title>Moustache Plucker</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -447,7 +447,7 @@ function getHomePage(): string {
 <body>
   <div class="container">
     <div class="moon">🌙</div>
-    <h1>Moustache Plucker Bot</h1>
+    <h1>Moustache Plucker</h1>
     <p>a minimal rng bot</p>
   </div>
 </body>
