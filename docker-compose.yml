@@ -10,7 +10,8 @@ services:
     env_file:
       - .env
     ports:
-      - "3001:3001"  # Health check server port
+      - "3847:3001"  # Health check server port
+      - "8765:8432"  # Web server port for giveaway reports
     volumes:
       # Persist database between container restarts
       - ./data:/app/data
