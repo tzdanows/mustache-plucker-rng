@@ -3,7 +3,13 @@
 // Test script to manually sync a giveaway to Deno Deploy
 
 const deployUrl = Deno.env.get("DEPLOY_URL") || "https://mustache-plucker.deno.dev";
-const authToken = Deno.env.get("DEPLOY_SECRET") || "mustacherngpluckernightcaps2025";
+const authToken = Deno.env.get("DEPLOY_SECRET");
+
+if (!authToken) {
+  console.error("❌ DEPLOY_SECRET environment variable is required");
+  console.error("Please set it in your .env file");
+  Deno.exit(1);
+}
 
 const testGiveaway = {
   giveawayId: "test-" + Date.now(),

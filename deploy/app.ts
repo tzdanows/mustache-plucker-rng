@@ -70,7 +70,11 @@ async function handleGiveawayUpdate(req: Request): Promise<Response> {
   try {
     // Verify authorization (add your own secret token)
     const authHeader = req.headers.get("Authorization");
-    const expectedToken = Deno.env.get("BOT_SECRET") || "mustacherngpluckernightcaps2025";
+    const expectedToken = Deno.env.get("BOT_SECRET");
+    if (!expectedToken) {
+      console.error("BOT_SECRET not configured");
+      return new Response("Server configuration error", { status: 500, headers: corsHeaders });
+    }
     
     console.log("Received giveaway update request");
     console.log("Auth header:", authHeader ? "Present" : "Missing");
