@@ -1,13 +1,5 @@
 # Moustache Plucker Bot
 
-![media](https://cdn.discordapp.com/emojis/1354520022307045437.webp?size=240&animated=true)
-![media](https://cdn.discordapp.com/emojis/1354520022307045437.webp?size=240&animated=true)
-![media](https://cdn.discordapp.com/emojis/1354520022307045437.webp?size=240&animated=true)
-![media](https://cdn.discordapp.com/emojis/1354520022307045437.webp?size=240&animated=true)
-![media](https://cdn.discordapp.com/emojis/1354520022307045437.webp?size=240&animated=true)
-![media](https://cdn.discordapp.com/emojis/1354520022307045437.webp?size=240&animated=true)
-![media](https://cdn.discordapp.com/emojis/1354520022307045437.webp?size=240&animated=true)
-
 - minimal discord RNG bot that "plucks" random winners from reactions
 - optimized for rapid reactions via concurrency
 - this bot uses the Web Crypto API's crypto.getRandomValues() which generates cryptographically secure random numbers. the [Fisher-Yates shuffle algorithm](https://youtu.be/gt0Ro1PqFTk) then ensures every participant has an exactly [equal chance of winning](https://bost.ocks.org/mike/shuffle/), making manipulation mathematically impossible.
