@@ -79,59 +79,6 @@ serve(async (req: Request) => {
     }
   }
   
-  // Metrics endpoint for detailed statistics
-  if (url.pathname === "/metrics") {
-    try {
-      const db = getDatabase();
-      
-      // Get comprehensive statistics
-      const stats = db.prepare(`
-        SELECT 
-          (SELECT COUNT(*) FROM giveaways) as total_flash_sales,
-          (SELECT COUNT(*) FROM giveaways WHERE status = 'active') as active_flash_sales,
-          (SELECT COUNT(*) FROM giveaways WHERE status = 'ended') as ended_flash_sales,
-          (SELECT COUNT(*) FROM giveaways WHERE status = 'cancelled') as cancelled_flash_sales,
-          (SELECT COUNT(DISTINCT user_id) FROM participants) as unique_participants,
-          (SELECT COUNT(*) FROM participants) as total_entries,
-          (SELECT COUNT(*) FROM winners) as total_winners,
-          (SELECT MAX(created_at) FROM giveaways) as last_flash_sale_created,
-          (SELECT MAX(ends_at) FROM giveaways WHERE status = 'active') as next_flash_sale_ends
-      `).get() as any;
-      
-      // Get recent activity (last 24 hours)
-      const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-      const recentStats = db.prepare(`
-        SELECT 
-          (SELECT COUNT(*) FROM giveaways WHERE created_at > ?) as flash_sales_24h,
-          (SELECT COUNT(*) FROM participants WHERE entered_at > ?) as entries_24h
-      `).get(yesterday, yesterday) as any;
-      
-      const uptime = Date.now() - startTime;
-      
-      return new Response(JSON.stringify({
-        timestamp: new Date().toISOString(),
-        uptime_ms: uptime,
-        uptime_human: `${Math.floor(uptime / 1000 / 60 / 60)}h ${Math.floor((uptime / 1000 / 60) % 60)}m`,
-        statistics: {
-          all_time: stats,
-          last_24_hours: recentStats
-        }
-      }), {
-        status: 200,
-        headers
-      });
-    } catch (error) {
-      logger.error("Metrics fetch failed:", error);
-      return new Response(JSON.stringify({ 
-        error: error.message,
-        timestamp: new Date().toISOString()
-      }), {
-        status: 500,
-        headers
-      });
-    }
-  }
-  
   // Simple ping endpoint for quick checks
   if (url.pathname === "/ping") {
     return new Response("pong", { 
@@ -151,10 +98,9 @@ serve(async (req: Request) => {
       endpoints: {
         "/": "This documentation",
         "/health": "Health status and basic checks",
-        "/metrics": "Detailed statistics and metrics",
         "/ping": "Simple ping/pong check"
       },
-      documentation: "Use these endpoints with Uptime Kuma or similar monitoring tools",
+      documentation: "Use /health endpoint with Uptime Kuma for monitoring",
       timestamp: new Date().toISOString()
     }, null, 2), {
       status: 200,
@@ -166,7 +112,7 @@ serve(async (req: Request) => {
   return new Response(JSON.stringify({
     error: "Not Found",
     message: `Endpoint ${url.pathname} does not exist`,
-    available_endpoints: ["/", "/health", "/metrics", "/ping"]
+    available_endpoints: ["/", "/health", "/ping"]
   }), { 
     status: 404,
     headers
@@ -182,8 +128,7 @@ console.log(`
 ║                                            ║
 ║   Endpoints:                               ║
 ║   • /health  - Health status               ║
-║   • /metrics - Statistics                  ║
 ║   • /ping    - Simple check                ║
-║   • /        - Documentation               ║
+║   • /             - Documentation          ║
 ╚════════════════════════════════════════════╝
 `);
