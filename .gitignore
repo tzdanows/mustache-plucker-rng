@@ -43,3 +43,10 @@ coverage/
 # Temporary files
 tmp/
 temp/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# Compiled binary
+moustache-plucker

@@ -13,12 +13,23 @@
     "lint": "deno lint",
     "check": "deno check src/**/*.ts",
     "init": "deno cache --reload src/deps.ts && deno task db:init",
-    "db:init": "deno run --allow-read --allow-write --allow-ffi --allow-env src/db/migrate.ts",
+    "db:init": "echo 'Database migrations handled automatically on startup'",
     "db:seed": "deno run --allow-read --allow-write --allow-env --allow-ffi --allow-net src/db/seed.ts",
     "build": "deno compile --allow-net --allow-env --allow-read --allow-write --output=moustache-plucker src/main.ts",
     "register": "deno run --allow-net --allow-env --allow-read src/register-commands.ts",
     "register:global": "deno run --allow-net --allow-env --allow-read src/register-commands.ts",
-    "register:guild": "DISCORD_GUILD_ID=${DISCORD_GUILD_ID} deno run --allow-net --allow-env --allow-read src/register-commands.ts"
+    "register:guild": "DISCORD_GUILD_ID=${DISCORD_GUILD_ID} deno run --allow-net --allow-env --allow-read src/register-commands.ts",
+    
+    "docker:build": "docker-compose build --no-cache",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "docker:restart": "docker-compose restart",
+    "docker:shell": "docker-compose exec bot sh",
+    
+    "deploy": "deno run --allow-run --allow-read --allow-write --allow-env scripts/deploy.ts",
+    "restart": "deno run --allow-run --allow-net --allow-env scripts/restart.ts",
+    "tmux": "bash scripts/start-tmux.sh"
   },
   "imports": {
     "@std/dotenv": "jsr:@std/dotenv@^0.225.0",

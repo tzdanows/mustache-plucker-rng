@@ -11,12 +11,24 @@ export class DeploySync {
     this.client = client;
     // Use the configured URL, defaulting to production
     this.deployUrl = Deno.env.get("DEPLOY_URL") || "https://mustache-plucker.deno.dev";
-    this.authToken = Deno.env.get("DEPLOY_SECRET") || "mustacherngpluckernightcaps2025";
+    
+    const secret = Deno.env.get("DEPLOY_SECRET");
+    if (!secret) {
+      logger.warn("DEPLOY_SECRET not configured - deploy sync will be disabled");
+      this.authToken = "";
+    } else {
+      this.authToken = secret;
+    }
     
     logger.info(`DeploySync configured for: ${this.deployUrl}`);
   }
 
   async syncGiveaway(giveawayId: string): Promise<void> {
+    if (!this.authToken) {
+      logger.warn("Deploy sync skipped - DEPLOY_SECRET not configured");
+      return;
+    }
+    
     try {
       const db = getDatabase();
       
