@@ -23,6 +23,7 @@
     "jsr:@std/streams@0.221": "0.221.0",
     "npm:@discordjs/builders@^1.9.0": "1.11.3",
     "npm:@discordjs/rest@^2.4.0": "2.6.0",
+    "npm:discord.js@14": "14.22.1",
     "npm:discord.js@^14.16.3": "14.22.1"
   },
   "jsr": {

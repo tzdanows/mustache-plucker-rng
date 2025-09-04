@@ -51,7 +51,11 @@ All commands require admin permissions (Manage Server) to use:
 ## dev scripts + testing
 
 - `deno task dev` - start development bot
-- `deno task test` - run quick tests
-- `deno task test:full` - run all tests
 - `deno task build` - build for production
 - `deno task init` - init database
+- `deno task test:quick` - run quick tests
+- `deno task test:full` - run all tests
+- `deno task test:stress`
+- `deno task test:unit`
+- `deno task test:integration`
+- `deno fmt`

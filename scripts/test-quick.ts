@@ -136,7 +136,6 @@ await test("Discord token format is valid", () => {
 await test("Required directories exist", async () => {
   const requiredDirs = [
     "./src",
-    "./src/commands",
     "./src/services",
     "./src/utils",
     "./src/db",
