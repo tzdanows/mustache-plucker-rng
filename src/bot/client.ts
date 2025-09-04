@@ -42,7 +42,7 @@ export class MoustachePluckerBot extends Client {
       // Login to Discord
       logger.info("Attempting to login to Discord...");
       await this.login(config.discord.token);
-      
+
       logger.info("Moustache Plucker Bot is starting...");
     } catch (error) {
       logger.error("Failed to start bot:", error instanceof Error ? error.message : String(error));
@@ -66,13 +66,13 @@ export class MoustachePluckerBot extends Client {
       try {
         const eventModule = await import(`../events/${file}`);
         const event = eventModule.default;
-        
+
         if (event.once) {
           this.once(event.name, (...args) => event.execute(...args));
         } else {
           this.on(event.name, (...args) => event.execute(...args));
         }
-        
+
         logger.debug(`Registered event: ${event.name}`);
       } catch (error) {
         logger.warn(`Could not load event ${file}:`, error);
@@ -96,7 +96,7 @@ export class MoustachePluckerBot extends Client {
       try {
         const commandModule = await import(`../commands/${file}`);
         const command = commandModule.default;
-        
+
         this.commands.set(command.data.name, command);
         logger.debug(`Loaded command: ${command.data.name}`);
       } catch (error) {

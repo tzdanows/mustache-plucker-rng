@@ -1,19 +1,19 @@
-import { initDatabase, getDatabase, closeDatabase } from "./database.ts";
+import { closeDatabase, getDatabase, initDatabase } from "./database.ts";
 import { logger } from "../utils/logger.ts";
 
 async function seedDatabase() {
   try {
     logger.info("Starting database seeding...");
-    
+
     // Initialize database
     await initDatabase();
     const db = getDatabase();
-    
+
     // Clear existing data
     db.exec("DELETE FROM winners");
     db.exec("DELETE FROM participants");
     db.exec("DELETE FROM giveaways");
-    
+
     // Create sample giveaways
     const giveaways = [
       {
@@ -56,7 +56,7 @@ async function seedDatabase() {
         status: "ended",
       },
     ];
-    
+
     // Insert giveaways
     const giveawayStmt = db.prepare(`
       INSERT INTO giveaways (
@@ -64,7 +64,7 @@ async function seedDatabase() {
         item_name, item_quantity, item_price, winner_count, ends_at, status
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    
+
     for (const giveaway of giveaways) {
       giveawayStmt.run(
         giveaway.id,
@@ -77,11 +77,11 @@ async function seedDatabase() {
         giveaway.item_price,
         giveaway.winner_count,
         giveaway.ends_at,
-        giveaway.status
+        giveaway.status,
       );
       logger.info(`Created giveaway: ${giveaway.item_name}`);
     }
-    
+
     // Add sample participants
     const participants = [
       { giveaway_id: "test-giveaway-1", user_id: "user1" },
@@ -95,26 +95,25 @@ async function seedDatabase() {
       { giveaway_id: "test-giveaway-3", user_id: "user1" },
       { giveaway_id: "test-giveaway-3", user_id: "user2" },
     ];
-    
+
     const participantStmt = db.prepare(
-      "INSERT INTO participants (giveaway_id, user_id) VALUES (?, ?)"
+      "INSERT INTO participants (giveaway_id, user_id) VALUES (?, ?)",
     );
-    
+
     for (const participant of participants) {
       participantStmt.run(participant.giveaway_id, participant.user_id);
     }
     logger.info(`Added ${participants.length} participants`);
-    
+
     // Add sample winners for the ended giveaway
     const winnerStmt = db.prepare(
-      "INSERT INTO winners (giveaway_id, user_id, position) VALUES (?, ?, ?)"
+      "INSERT INTO winners (giveaway_id, user_id, position) VALUES (?, ?, ?)",
     );
-    
+
     winnerStmt.run("test-giveaway-3", "user1", 1);
     logger.info("Added sample winner");
-    
+
     logger.info("Database seeding completed successfully!");
-    
   } catch (error) {
     logger.error("Failed to seed database:", error);
   } finally {

@@ -3,7 +3,7 @@ import { logger } from "./logger.ts";
 /**
  * Cryptographically secure random selection of winners from participants.
  * Uses Web Crypto API for true randomness.
- * 
+ *
  * @param participants Array of participant user IDs
  * @param winnerCount Number of winners to select
  * @returns Array of selected winner user IDs
@@ -29,11 +29,11 @@ export function selectRandomWinners(participants: string[], winnerCount: number)
 
     // Generate a cryptographically secure random index
     const randomIndex = getSecureRandomInt(0, availableParticipants.length - 1);
-    
+
     // Select and remove the winner from available pool
     const winner = availableParticipants.splice(randomIndex, 1)[0];
     winners.push(winner);
-    
+
     logger.debug(`Selected winner ${i + 1}: ${winner}`);
   }
 
@@ -54,8 +54,7 @@ function getSecureRandomInt(min: number, max: number): number {
   do {
     const randomBytes = new Uint8Array(bytesNeeded);
     crypto.getRandomValues(randomBytes);
-    randomValue = randomBytes.reduce((acc, byte, index) => 
-      acc + byte * Math.pow(256, index), 0);
+    randomValue = randomBytes.reduce((acc, byte, index) => acc + byte * Math.pow(256, index), 0);
   } while (randomValue >= threshold);
 
   return min + (randomValue % range);
@@ -68,24 +67,24 @@ function getSecureRandomInt(min: number, max: number): number {
 export function testRandomDistribution(sampleSize: number = 10000): void {
   const participants = ["A", "B", "C", "D", "E"];
   const results: Record<string, number> = {};
-  
+
   // Initialize counters
   for (const p of participants) {
     results[p] = 0;
   }
-  
+
   // Run multiple selections
   for (let i = 0; i < sampleSize; i++) {
     const winner = selectRandomWinners(participants, 1)[0];
     results[winner]++;
   }
-  
+
   // Calculate and log distribution
   console.log("Random Distribution Test Results:");
   console.log(`Sample size: ${sampleSize}`);
   console.log("Expected probability: 20% each");
   console.log("Actual distribution:");
-  
+
   for (const [participant, count] of Object.entries(results)) {
     const percentage = ((count / sampleSize) * 100).toFixed(2);
     console.log(`  ${participant}: ${percentage}% (${count} times)`);

@@ -1,4 +1,4 @@
-import { Events, type Interaction, type ChatInputCommandInteraction } from "../deps.ts";
+import { type ChatInputCommandInteraction, Events, type Interaction } from "../deps.ts";
 import { logger } from "../utils/logger.ts";
 import { handleInteractionError } from "../utils/errorHandler.ts";
 import type { MoustachePluckerBot } from "../bot/client.ts";
@@ -7,13 +7,13 @@ export default {
   name: Events.InteractionCreate,
   async execute(interaction: Interaction) {
     const client = interaction.client as MoustachePluckerBot;
-    
+
     // Use the new interaction handler if available
     if (client.interactionHandler) {
       await client.interactionHandler.handleInteraction(interaction);
       return;
     }
-    
+
     // Fallback to old command system
     if (!interaction.isChatInputCommand()) return;
 
@@ -40,10 +40,10 @@ export default {
 
       // Check permissions if specified
       if (command.permissions && interaction.memberPermissions) {
-        const hasPermission = command.permissions.every(perm => 
+        const hasPermission = command.permissions.every((perm) =>
           interaction.memberPermissions!.has(perm)
         );
-        
+
         if (!hasPermission) {
           await interaction.reply({
             content: "❌ You don't have the required permissions for this command.",

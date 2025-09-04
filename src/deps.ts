@@ -1,29 +1,29 @@
 // Discord.js dependencies
 export {
-  Client,
-  GatewayIntentBits,
-  Events,
-  Collection,
-  type Interaction,
-  type CommandInteraction,
-  type ChatInputCommandInteraction,
-  type MessageReaction,
-  type User,
-  type PartialMessageReaction,
-  type PartialUser,
-  type TextChannel,
-  type PermissionResolvable,
-  EmbedBuilder,
   ActionRowBuilder,
   ButtonBuilder,
   ButtonStyle,
-  SlashCommandBuilder,
+  type ChatInputCommandInteraction,
+  Client,
+  Collection,
+  type CommandInteraction,
+  EmbedBuilder,
+  Events,
+  GatewayIntentBits,
+  type Interaction,
+  type MessageReaction,
+  type PartialMessageReaction,
+  type PartialUser,
+  type PermissionResolvable,
   REST,
-  Routes,
   type RESTPostAPIChatInputApplicationCommandsJSONBody,
+  Routes,
+  SlashCommandBuilder,
+  type TextChannel,
+  type User,
 } from "discord.js";
 
-// Standard library dependencies  
+// Standard library dependencies
 export { load } from "@std/dotenv";
 export { ensureDir } from "@std/fs/ensure-dir";
 export { join } from "@std/path";

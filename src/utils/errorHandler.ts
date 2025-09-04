@@ -5,7 +5,7 @@ export class BotError extends Error {
   constructor(
     message: string,
     public code: string,
-    public userMessage?: string
+    public userMessage?: string,
   ) {
     super(message);
     this.name = "BotError";
@@ -35,11 +35,11 @@ export class DatabaseError extends BotError {
 
 export async function handleInteractionError(
   error: unknown,
-  interaction: CommandInteraction
+  interaction: CommandInteraction,
 ): Promise<void> {
   const errorMessage = error instanceof Error ? error.message : String(error);
   const errorStack = error instanceof Error ? error.stack : undefined;
-  
+
   logger.error(`Error in command ${interaction.commandName}:`, {
     error: errorMessage,
     stack: errorStack,
@@ -48,7 +48,7 @@ export async function handleInteractionError(
   });
 
   let userMessage = "An unexpected error occurred. Please try again later.";
-  
+
   if (error instanceof BotError) {
     userMessage = error.userMessage || userMessage;
   }

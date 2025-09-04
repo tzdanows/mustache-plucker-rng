@@ -1,4 +1,10 @@
-import { Events, type MessageReaction, type User, type PartialMessageReaction, type PartialUser } from "../deps.ts";
+import {
+  Events,
+  type MessageReaction,
+  type PartialMessageReaction,
+  type PartialUser,
+  type User,
+} from "../deps.ts";
 import { logger } from "../utils/logger.ts";
 import { removeParticipant } from "../db/giveawayRepository.ts";
 
@@ -23,10 +29,10 @@ export default {
       try {
         const messageId = reaction.message.id;
         const userId = user.id;
-        
+
         // Remove participant from the giveaway
         const removed = await removeParticipant(messageId, userId);
-        
+
         if (removed) {
           logger.info(`User ${user.tag} left giveaway on message ${messageId}`);
         }

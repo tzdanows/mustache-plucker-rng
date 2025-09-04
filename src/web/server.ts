@@ -20,7 +20,9 @@ export class WebServer {
     try {
       this.server = Deno.serve({ port: this.port }, (request) => this.handleRequest(request));
       logger.info(`Web server started on port ${this.port}`);
-      logger.info(`Giveaway reports will be available at http://localhost:${this.port}/report/{giveaway_id}`);
+      logger.info(
+        `Giveaway reports will be available at http://localhost:${this.port}/report/{giveaway_id}`,
+      );
     } catch (error) {
       logger.error(`Failed to start web server on port ${this.port}:`, error);
       throw error;
@@ -38,10 +40,10 @@ export class WebServer {
   private async handleRequest(request: Request): Promise<Response> {
     const startTime = Date.now();
     const url = new URL(request.url);
-    
+
     try {
       let response: Response;
-      
+
       if (url.pathname === "/") {
         metrics.incrementPageViews();
         response = this.handleHome();
@@ -59,7 +61,7 @@ export class WebServer {
       } else {
         response = new Response("Not Found", { status: 404 });
       }
-      
+
       metrics.recordResponseTime(Date.now() - startTime);
       return response;
     } catch (error) {
@@ -97,7 +99,7 @@ export class WebServer {
     </div>
 </body>
 </html>`;
-    
+
     return new Response(html, {
       headers: { "Content-Type": "text/html" },
     });
@@ -106,14 +108,14 @@ export class WebServer {
   private async handleGiveawayReport(giveawayId: string): Promise<Response> {
     try {
       const db = getDatabase();
-      
+
       // Get giveaway data
       const giveaway = db.prepare("SELECT * FROM giveaways WHERE id = ?").get(giveawayId);
-      
+
       if (!giveaway) {
         return new Response("Giveaway not found", { status: 404 });
       }
-      
+
       // Get participants
       const participants = db.prepare(`
         SELECT user_id, entered_at 
@@ -121,7 +123,7 @@ export class WebServer {
         WHERE giveaway_id = ? 
         ORDER BY entered_at ASC
       `).all(giveawayId);
-      
+
       // Get winners
       const winners = db.prepare(`
         SELECT user_id, position 
@@ -129,16 +131,16 @@ export class WebServer {
         WHERE giveaway_id = ? 
         ORDER BY position ASC
       `).all(giveawayId);
-      
+
       // Resolve usernames
       const userMap = await this.resolveUsernames([
         ...participants.map((p: any) => p.user_id),
         ...winners.map((w: any) => w.user_id),
-        (giveaway as any).creator_id
+        (giveaway as any).creator_id,
       ]);
-      
+
       const html = this.generateReportHTML(giveaway, participants, winners, userMap);
-      
+
       return new Response(html, {
         headers: { "Content-Type": "text/html" },
       });
@@ -152,17 +154,17 @@ export class WebServer {
     try {
       const authHeader = request.headers.get("Authorization");
       const expectedSecret = Deno.env.get("DEPLOY_SECRET");
-      
+
       if (!expectedSecret || authHeader !== `Bearer ${expectedSecret}`) {
         return new Response("Unauthorized", { status: 401 });
       }
-      
+
       const data = await request.json();
-      
+
       // Store the giveaway data (this would typically go to a database)
       // For now, just acknowledge receipt
       logger.info(`Received giveaway sync for: ${data.giveawayId}`);
-      
+
       return new Response("Sync successful", { status: 200 });
     } catch (error) {
       logger.error("Error handling giveaway sync:", error);
@@ -172,13 +174,13 @@ export class WebServer {
 
   private async resolveUsernames(userIds: string[]): Promise<Map<string, string>> {
     const userMap = new Map<string, string>();
-    
+
     if (!this.client) {
       // Return IDs as fallback if no client
-      userIds.forEach(id => userMap.set(id, id));
+      userIds.forEach((id) => userMap.set(id, id));
       return userMap;
     }
-    
+
     for (const userId of new Set(userIds)) {
       try {
         const user = await this.client.users.fetch(userId);
@@ -187,26 +189,31 @@ export class WebServer {
         userMap.set(userId, userId);
       }
     }
-    
+
     return userMap;
   }
 
-  private generateReportHTML(giveaway: any, participants: any[], winners: any[], userMap: Map<string, string>): string {
+  private generateReportHTML(
+    giveaway: any,
+    participants: any[],
+    winners: any[],
+    userMap: Map<string, string>,
+  ): string {
     const createdDate = new Date(giveaway.created_at).toLocaleString();
     const endedDate = new Date(giveaway.ends_at).toLocaleString();
     const creatorUsername = userMap.get(giveaway.creator_id) || giveaway.creator_id;
-    
+
     const participantsList = participants.map((p: any) => {
       const username = userMap.get(p.user_id) || p.user_id;
       const enteredAt = new Date(p.entered_at).toLocaleString();
       return `<li>${username} (entered ${enteredAt})</li>`;
     }).join("");
-    
+
     const winnersList = winners.map((w: any) => {
       const username = userMap.get(w.user_id) || w.user_id;
       return `<li><strong>#${w.position}: ${username}</strong></li>`;
     }).join("");
-    
+
     return `
 <!DOCTYPE html>
 <html>
@@ -228,7 +235,7 @@ export class WebServer {
             padding: 15px; 
             border-radius: 8px; 
             margin: 20px 0;
-            background: ${giveaway.status === 'ended' ? '#2ecc71' : '#e74c3c'};
+            background: ${giveaway.status === "ended" ? "#2ecc71" : "#e74c3c"};
         }
         .section { 
             background: #36393f; 
@@ -262,16 +269,24 @@ export class WebServer {
         <p><strong>Winners Selected:</strong> ${winners.length} / ${giveaway.winner_count}</p>
     </div>
     
-    ${winners.length > 0 ? `
+    ${
+      winners.length > 0
+        ? `
     <div class="section winners">
         <h2>Winners</h2>
         <ul>${winnersList}</ul>
     </div>
-    ` : ''}
+    `
+        : ""
+    }
     
     <div class="section participants">
         <h2>Participants (${participants.length})</h2>
-        ${participants.length > 0 ? `<ul>${participantsList}</ul>` : '<p class="no-entries">No participants entered this flash sale.</p>'}
+        ${
+      participants.length > 0
+        ? `<ul>${participantsList}</ul>`
+        : '<p class="no-entries">No participants entered this flash sale.</p>'
+    }
     </div>
     
     <div class="meta">
@@ -284,18 +299,18 @@ export class WebServer {
   private async handleMetricsJson(): Promise<Response> {
     try {
       const botMetrics = await metrics.getMetrics();
-      
+
       return new Response(JSON.stringify(botMetrics, null, 2), {
-        headers: { 
+        headers: {
           "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*"
+          "Access-Control-Allow-Origin": "*",
         },
       });
     } catch (error) {
       logger.error("Error generating metrics:", error);
-      return new Response(JSON.stringify({ error: "Failed to generate metrics" }), { 
+      return new Response(JSON.stringify({ error: "Failed to generate metrics" }), {
         status: 500,
-        headers: { "Content-Type": "application/json" }
+        headers: { "Content-Type": "application/json" },
       });
     }
   }

@@ -1,10 +1,10 @@
-import type { 
-  CommandInteraction, 
-  Client, 
-  Collection,
-  SlashCommandBuilder,
+import type {
   ChatInputCommandInteraction,
-  PermissionResolvable
+  Client,
+  Collection,
+  CommandInteraction,
+  PermissionResolvable,
+  SlashCommandBuilder,
 } from "../deps.ts";
 
 export interface SlashCommand {

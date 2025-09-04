@@ -7,7 +7,7 @@ import { logger } from "../utils/logger.ts";
 export class EmbedUpdater {
   private client: Client;
   private updateInterval: number | null = null;
-  private activeGiveaways: Map<string, { giveaway: any, lastUpdate: number }> = new Map();
+  private activeGiveaways: Map<string, { giveaway: any; lastUpdate: number }> = new Map();
   private messageCache: Map<string, any> = new Map();
   private lastUpdateTime: Map<string, number> = new Map();
   private endingGiveaways: Set<string> = new Set();
@@ -24,7 +24,7 @@ export class EmbedUpdater {
 
     // Initial update
     this.updateActiveGiveaways();
-    
+
     logger.info("Embed updater started (intelligent update frequency based on time remaining)");
   }
 
@@ -39,9 +39,9 @@ export class EmbedUpdater {
   async addGiveaway(giveawayId: string): Promise<void> {
     const db = getDatabase();
     const giveaway = db.prepare(
-      "SELECT * FROM giveaways WHERE id = ? AND status = 'active'"
+      "SELECT * FROM giveaways WHERE id = ? AND status = 'active'",
     ).get(giveawayId);
-    
+
     if (giveaway) {
       this.activeGiveaways.set(giveawayId, { giveaway, lastUpdate: Date.now() });
     }
@@ -59,10 +59,10 @@ export class EmbedUpdater {
   private async updateActiveGiveaways(): Promise<void> {
     try {
       const db = getDatabase();
-      
+
       // Get all active giveaways
       const activeGiveaways = db.prepare(
-        "SELECT * FROM giveaways WHERE status = 'active'"
+        "SELECT * FROM giveaways WHERE status = 'active'",
       ).all();
 
       for (const giveaway of activeGiveaways) {
@@ -76,18 +76,18 @@ export class EmbedUpdater {
   private async updateGiveawayEmbed(giveaway: any): Promise<void> {
     try {
       if (!giveaway.message_id) return;
-      
+
       // Skip if this giveaway is currently ending
       if (this.endingGiveaways.has(giveaway.id)) {
         return;
       }
-      
+
       // Intelligent rate limiting based on time remaining
       const endsAtMs = new Date(giveaway.ends_at).getTime();
       const now = Date.now();
       const timeLeft = endsAtMs - now;
       const lastUpdate = this.lastUpdateTime.get(giveaway.id) || 0;
-      
+
       // Update more frequently as deadline approaches
       let minUpdateInterval: number;
       if (timeLeft < 10000) { // Last 10 seconds - update every second
@@ -99,7 +99,7 @@ export class EmbedUpdater {
       } else { // More than 5 minutes - update every 5 seconds
         minUpdateInterval = 5000;
       }
-      
+
       if (now - lastUpdate < minUpdateInterval) {
         return;
       }
@@ -119,9 +119,11 @@ export class EmbedUpdater {
       const timeRemaining = formatTimeRemaining(endsAt);
 
       // Build updated embed with new format
-      const titleText = giveaway.item_name;  // Title without bold
-      
-      const description = `plucking in: \`${timeRemaining === "Ended" ? "Ending..." : timeRemaining}\`\nentries: \`${participantCount}\`\nwinner(s): awaiting...`;
+      const titleText = giveaway.item_name; // Title without bold
+
+      const description = `plucking in: \`${
+        timeRemaining === "Ended" ? "Ending..." : timeRemaining
+      }\`\nentries: \`${participantCount}\`\nwinner(s): awaiting...`;
 
       const embed = new EmbedBuilder()
         .setTitle(titleText)
@@ -134,7 +136,7 @@ export class EmbedUpdater {
       await message.edit({ embeds: [embed] }).catch((error) => {
         logger.debug(`Could not update giveaway embed: ${error.message}`);
       });
-      
+
       // Record update time
       this.lastUpdateTime.set(giveaway.id, Date.now());
     } catch (error) {

@@ -1,4 +1,10 @@
-import { Events, type MessageReaction, type User, type PartialMessageReaction, type PartialUser } from "../deps.ts";
+import {
+  Events,
+  type MessageReaction,
+  type PartialMessageReaction,
+  type PartialUser,
+  type User,
+} from "../deps.ts";
 import { logger } from "../utils/logger.ts";
 import { addParticipant } from "../db/giveawayRepository.ts";
 
@@ -23,10 +29,10 @@ export default {
       try {
         const messageId = reaction.message.id;
         const userId = user.id;
-        
+
         // Add participant to the giveaway
         const added = await addParticipant(messageId, userId);
-        
+
         if (added) {
           logger.info(`User ${user.tag} entered giveaway on message ${messageId}`);
         }

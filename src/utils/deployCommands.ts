@@ -1,10 +1,10 @@
-import { REST, Routes, type RESTPostAPIChatInputApplicationCommandsJSONBody } from "../deps.ts";
+import { REST, type RESTPostAPIChatInputApplicationCommandsJSONBody, Routes } from "../deps.ts";
 import { config } from "../config/config.ts";
 import { logger } from "./logger.ts";
 
 export async function deployCommands(): Promise<void> {
   const commands: RESTPostAPIChatInputApplicationCommandsJSONBody[] = [];
-  
+
   // Import command modules and get their data
   const commandFiles = [
     "../commands/giveaway.ts",
