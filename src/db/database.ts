@@ -9,7 +9,11 @@ export async function initDatabase(): Promise<void> {
   try {
     // Ensure the database directory exists
     const dbPath = config.database.path;
-    await ensureDir(dirname(dbPath));
+    const dbDir = dirname(dbPath);
+    
+    logger.info(`Database path: ${dbPath}`);
+    
+    await ensureDir(dbDir);
 
     // Open database connection
     db = new Database(dbPath);

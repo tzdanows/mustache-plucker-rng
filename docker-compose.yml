@@ -6,15 +6,15 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: mustache-plucker-bot
-    restart: unless-stopped
+    restart: on-failure:5
     env_file:
       - .env
     ports:
       - "3847:3001"  # Health check server port
       - "8765:8432"  # Web server port for giveaway reports
     volumes:
-      # Persist database between container restarts
-      - ./data:/app/data
+      # Persist database between container restarts - use Docker volume instead of bind mount
+      - bot-data:/app/data
       # Mount source code for development (optional - remove for production)
       # - ./src:/app/src:ro
       # - ./deno.json:/app/deno.json:ro

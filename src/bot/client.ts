@@ -83,12 +83,11 @@ export class MoustachePluckerBot extends Client {
   private async loadCommands(): Promise<void> {
     // Import and register all command handlers
     const commandFiles = [
-      "giveaway.ts",
+      "fs.ts",        // Flash sale command
       "cancel.ts",
       "end.ts",
-      "list.ts",
       "ping.ts",
-      "stats.ts",
+      "hello.ts",
       "sync.ts",
     ];
 
